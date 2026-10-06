@@ -140,7 +140,7 @@
     .edit-row-panel.active { display: table-row; }
     .edit-grid { padding: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 6px; margin: 10px; white-space: normal; }
 
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; padding: 10px; overflow-y: auto; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; padding: 20px 10px; overflow-y: auto; }
     .modal.active { display: flex; }
     .modal-card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     
@@ -171,12 +171,12 @@
     .inv-totals .grand-total { font-weight: bold; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 0; font-size: 15px; margin-top: 8px; }
     .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; font-size: 12px; }
     
-    /* Action Bar locked nicely above invoice container */
+    /* Action Bar placed safely at the bottom of the invoice preview container */
     .invoice-actions-bar {
       display: flex;
       gap: 10px;
       justify-content: flex-end;
-      margin-bottom: 12px;
+      margin-top: 15px;
       max-width: 620px;
       margin-left: auto;
       margin-right: auto;
@@ -378,13 +378,7 @@
 
   <!-- PDF Invoice Modal -->
   <div class="modal" id="invoiceModal">
-    <div style="width: 100%; max-width: 650px; padding: 10px;">
-      
-      <!-- Action buttons clearly visible and always accessible -->
-      <div class="invoice-actions-bar">
-        <button class="outline" onclick="closeInvoice()" style="background:white; padding: 8px 16px; min-height: 38px;">Close</button>
-        <button onclick="printInvoice()" style="padding: 8px 16px; min-height: 38px;">Print PDF Invoice</button>
-      </div>
+    <div style="width: 100%; max-width: 650px; padding: 10px 0;">
       
       <div class="invoice-wrapper" id="printableInvoice">
         <div class="inv-sub">INVOICE</div>
@@ -434,6 +428,13 @@
           </div>
         </div>
       </div>
+
+      <!-- Action buttons moved safely below the invoice container -->
+      <div class="invoice-actions-bar">
+        <button class="outline" onclick="closeInvoice()" style="background:white; padding: 10px 20px; min-height: 42px;">Close</button>
+        <button onclick="printInvoice()" style="padding: 10px 20px; min-height: 42px;">Print PDF Invoice</button>
+      </div>
+
     </div>
   </div>
 
@@ -837,7 +838,7 @@
     const monthlyData = {};
     localData.trips.forEach(t => {
       const month = t.date ? t.date.substring(0, 7) : 'Unknown';
-      monthlyData[month] = (monthlyData[month] || 0) + t.freight + t.tollcost;
+      monthlyData[month] = (monthlyData[month] + t.freight + t.tollcost) || (t.freight + t.tollcost);
     });
 
     const chartEl = document.getElementById('revenueChart');
