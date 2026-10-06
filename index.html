@@ -29,7 +29,7 @@
     .nav-links { display: flex; gap: 8px; }
     .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: bold; padding: 10px 14px; border-radius: 6px; font-size: 0.9rem; }
     .nav-links a.active { background: var(--accent-light); color: var(--accent); }
-    .header-actions { display: flex; align-items: center; gap: 10px; }
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .user-badge { background: #E2E8F0; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
 
     /* Mascot Animation */
@@ -142,24 +142,41 @@
 <div class="modal active" id="loginModal">
   <div class="modal-card">
     <h2 style="color:var(--accent); text-align:center; margin-bottom:10px;">🔐 Vantage ERP Access</h2>
-    <p style="color:var(--text-muted); font-size:0.88rem; text-align:center; margin-bottom:20px;">Select or add a local profile to start logging trips.</p>
+    <p style="color:var(--text-muted); font-size:0.88rem; text-align:center; margin-bottom:20px;">Select your account and enter password to log in.</p>
     
-    <div style="margin-bottom: 15px;">
-      <label>Select Local Account</label>
+    <div style="margin-bottom: 12px;">
+      <label>Select Account</label>
       <select id="userSelect"></select>
     </div>
 
-    <button onclick="loginUser()" style="width:100%; margin-bottom:15px;">🔓 Login to Workspace</button>
+    <div style="margin-bottom: 20px;">
+      <label>Password</label>
+      <input type="password" id="userPassword" placeholder="Enter password">
+    </div>
+
+    <button onclick="loginUser()" style="width:100%;">🔓 Login to Workspace</button>
+  </div>
+</div>
+
+<!-- Admin User Management Modal -->
+<div class="modal" id="adminUserModal">
+  <div class="modal-card">
+    <h3 style="color:var(--accent); margin-bottom:15px;">⚙️ Admin User Management</h3>
+    <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Create or modify user accounts across the system.</p>
     
-    <hr style="border:none; border-top:1px solid var(--border); margin:15px 0;">
-    
-    <details style="font-size:0.85rem; color:var(--text-muted);">
-      <summary style="cursor:pointer; font-weight:bold;">➕ Manage / Add Local Account</summary>
-      <div style="margin-top:10px;">
-        <input type="text" id="newAccountName" placeholder="Enter Full Name (e.g. John Doe)" style="margin-bottom:8px;">
-        <button onclick="addLocalAccount()" class="outline" style="width:100%;">Create Local Profile</button>
-      </div>
-    </details>
+    <div style="margin-bottom:10px;">
+      <label>Account Name</label>
+      <input type="text" id="adminNewName" placeholder="Full Name">
+    </div>
+    <div style="margin-bottom:15px;">
+      <label>Password</label>
+      <input type="password" id="adminNewPass" placeholder="Password">
+    </div>
+
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button class="outline" onclick="closeAdminUserModal()">Cancel</button>
+      <button onclick="saveAdminNewAccount()">Save Account</button>
+    </div>
   </div>
 </div>
 
@@ -191,6 +208,7 @@
   </div>
   <div class="header-actions">
     <span class="user-badge" id="activeUserDisplay">👤 Guest</span>
+    <button class="outline" id="adminManageBtn" onclick="openAdminUserModal()" style="display:none; padding:6px 12px; min-height:36px; font-size:0.8rem;">⚙️ Manage Users</button>
     <button class="outline" onclick="logoutUser()" style="padding:6px 12px; min-height:36px; font-size:0.8rem;">Logout</button>
   </div>
 </header>
@@ -351,55 +369,100 @@
   let chartInstance = null;
   let currentUser = localStorage.getItem('vantage_active_user') || null;
 
-  // Local Accounts Management
-  function getAccounts() {
-    return JSON.parse(localStorage.getItem('vantage_accounts')) || ['Admin Laptop', 'Mobile User 1'];
+  // Default system accounts
+  const DEFAULT_ACCOUNTS = {
+    "Administrator": "administrator",
+    "Rayyan Hussain": "myweirdahh4400",
+    "Khushi Muhammad": "kmc11223344"
+  };
+
+  function getAccountMap() {
+    const saved = localStorage.getItem('vantage_account_map');
+    if (!saved) {
+      localStorage.setItem('vantage_account_map', JSON.stringify(DEFAULT_ACCOUNTS));
+      return DEFAULT_ACCOUNTS;
+    }
+    return JSON.parse(saved);
   }
 
   function renderAccountDropdown() {
     const select = document.getElementById('userSelect');
-    const accounts = getAccounts();
-    select.innerHTML = accounts.map(a => `<option value="${a}">${a}</option>`).join('');
-  }
-
-  function addLocalAccount() {
-    const input = document.getElementById('newAccountName');
-    const name = input.value.trim();
-    if (!name) return alert('Enter a profile name');
-    
-    const accounts = getAccounts();
-    if (!accounts.includes(name)) {
-      accounts.push(name);
-      localStorage.setItem('vantage_accounts', JSON.stringify(accounts));
-      renderAccountDropdown();
-      input.value = '';
-      alert(`Account "${name}" created!`);
-    }
+    const accountMap = getAccountMap();
+    select.innerHTML = Object.keys(accountMap).map(name => `<option value="${name}">${name}</option>`).join('');
   }
 
   function loginUser() {
     const name = document.getElementById('userSelect').value;
-    if (!name) return alert('Select an account');
-    currentUser = name;
-    localStorage.setItem('vantage_active_user', currentUser);
-    document.getElementById('loginModal').classList.remove('active');
-    document.getElementById('activeUserDisplay').innerText = `👤 ${currentUser}`;
+    const pass = document.getElementById('userPassword').value;
+    const accountMap = getAccountMap();
+
+    if (accountMap[name] && accountMap[name] === pass) {
+      currentUser = name;
+      localStorage.setItem('vantage_active_user', currentUser);
+      document.getElementById('loginModal').classList.remove('active');
+      document.getElementById('userPassword').value = '';
+      updateUserUI();
+    } else {
+      alert('Incorrect password for ' + name);
+    }
   }
 
   function logoutUser() {
     localStorage.removeItem('vantage_active_user');
     currentUser = null;
     document.getElementById('loginModal').classList.add('active');
+    updateUserUI();
+  }
+
+  function updateUserUI() {
+    const activeBadge = document.getElementById('activeUserDisplay');
+    const adminBtn = document.getElementById('adminManageBtn');
+    
+    if (currentUser) {
+      activeBadge.innerText = `👤 ${currentUser}`;
+      // Only show user management button if logged in as Administrator
+      adminBtn.style.display = (currentUser === 'Administrator') ? 'inline-flex' : 'none';
+    } else {
+      activeBadge.innerText = `👤 Guest`;
+      adminBtn.style.display = 'none';
+    }
   }
 
   function checkLoginState() {
     renderAccountDropdown();
     if (currentUser) {
       document.getElementById('loginModal').classList.remove('active');
-      document.getElementById('activeUserDisplay').innerText = `👤 ${currentUser}`;
+      updateUserUI();
     } else {
       document.getElementById('loginModal').classList.add('active');
     }
+  }
+
+  // Administrator Account Management Functions
+  function openAdminUserModal() {
+    if (currentUser !== 'Administrator') return alert('Access restricted to Administrator.');
+    document.getElementById('adminUserModal').classList.add('active');
+  }
+
+  function closeAdminUserModal() {
+    document.getElementById('adminUserModal').classList.remove('active');
+  }
+
+  function saveAdminNewAccount() {
+    const name = document.getElementById('adminNewName').value.trim();
+    const pass = document.getElementById('adminNewPass').value.trim();
+
+    if (!name || !pass) return alert('Please provide both account name and password.');
+
+    const accountMap = getAccountMap();
+    accountMap[name] = pass;
+    localStorage.setItem('vantage_account_map', JSON.stringify(accountMap));
+    
+    renderAccountDropdown();
+    document.getElementById('adminNewName').value = '';
+    document.getElementById('adminNewPass').value = '';
+    closeAdminUserModal();
+    alert(`Account "${name}" updated successfully!`);
   }
 
   function setToday() { 
