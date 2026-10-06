@@ -129,6 +129,13 @@
     button.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
     button.danger { background: var(--danger); }
     input, select { padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); width: 100%; font-size: 1rem; min-height: 44px; }
+    
+    /* Styled Placeholders to avoid confusion */
+    input::placeholder {
+      color: #94A3B8;
+      font-style: italic;
+    }
+
     .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 12px; }
     label { font-size: 0.8rem; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 4px; }
 
@@ -182,13 +189,51 @@
       margin-right: auto;
     }
 
+    /* Print Specific Centering Styles */
     @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+      html, body {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        background: #ffffff !important;
+      }
       body * { visibility: hidden !important; background: transparent !important; box-shadow: none !important; }
       #invoiceModal, #invoiceModal * { visibility: visible !important; }
-      #invoiceModal { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; padding: 0 !important; background: #ffffff !important; display: block !important; }
-      .invoice-wrapper { border: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; color: #000000 !important; margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+      #invoiceModal { 
+        position: relative !important; 
+        left: auto !important; 
+        top: auto !important; 
+        width: 100% !important; 
+        height: auto !important; 
+        padding: 0 !important; 
+        background: #ffffff !important; 
+        display: flex !important; 
+        justify-content: center !important; 
+        align-items: center !important; 
+      }
+      #invoiceModal > div {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+      .invoice-wrapper { 
+        border: none !important; 
+        width: 100% !important; 
+        max-width: 650px !important; 
+        padding: 0 !important; 
+        color: #000000 !important; 
+        margin: 0 auto !important; 
+        border-radius: 0 !important; 
+        box-shadow: none !important; 
+      }
       .invoice-actions-bar { display: none !important; }
-      @page { margin: 10mm; size: auto; }
     }
     
     @media (max-width: 600px) {
@@ -327,24 +372,24 @@
       <div class="form-row">
         <div><label>Delivery Date</label><input type="date" id="t-date" required></div>
         <div><label>Invoice / Log Issue Date</label><input type="date" id="t-issuedate" required></div>
-        <div><label>Bill To (Logistics Partner)</label><input type="text" id="t-billto" placeholder="TurboTix Logistics L.L.C" required></div>
-        <div><label>Partner TRN</label><input type="text" id="t-trn" placeholder="104700974900003"></div>
+        <div><label>Bill To (Logistics Partner)</label><input type="text" id="t-billto" placeholder="e.g. TurboTix Logistics L.L.C" required></div>
+        <div><label>Partner TRN</label><input type="text" id="t-trn" placeholder="e.g. 104700974900003"></div>
       </div>
       <div class="form-row">
-        <div><label>Partner Address</label><input type="text" id="t-address" placeholder="B10289, Al Quoz 3, Dubai"></div>
-        <div><label>End Client Name</label><input type="text" id="t-client" placeholder="Arab and India Spices FZC" required></div>
-        <div><label>Delivery Note #</label><input type="text" id="t-dn" placeholder="WB1-82546"></div>
-        <div><label>Vehicle Plate No.</label><input type="text" id="t-plate" placeholder="85017-J" required></div>
+        <div><label>Partner Address</label><input type="text" id="t-address" placeholder="e.g. B10289, Al Quoz 3, Dubai"></div>
+        <div><label>End Client Name</label><input type="text" id="t-client" placeholder="e.g. Arab and India Spices FZC" required></div>
+        <div><label>Delivery Note #</label><input type="text" id="t-dn" placeholder="e.g. WB1-82546"></div>
+        <div><label>Vehicle Plate No.</label><input type="text" id="t-plate" placeholder="e.g. 85017-J" required></div>
       </div>
       <div class="form-row">
-        <div><label>Origin (Load)</label><input type="text" id="t-origin" placeholder="Fujairah" required></div>
-        <div><label>Destination (Unload)</label><input type="text" id="t-dest" placeholder="Ajman" required></div>
-        <div><label>Freight Cost (AED)</label><input type="number" id="t-freight" step="any" required></div>
-        <div><label>Toll Name / Location</label><input type="text" id="t-tollname" placeholder="Al Dhaid (Sharjah)"></div>
+        <div><label>Origin (Load)</label><input type="text" id="t-origin" placeholder="e.g. Fujairah" required></div>
+        <div><label>Destination (Unload)</label><input type="text" id="t-dest" placeholder="e.g. Ajman" required></div>
+        <div><label>Freight Cost (AED)</label><input type="number" id="t-freight" step="any" placeholder="e.g. 1650" required></div>
+        <div><label>Toll Name / Location</label><input type="text" id="t-tollname" placeholder="e.g. Al Dhaid (Sharjah)"></div>
       </div>
       <div class="form-row">
-        <div><label>Toll Cost (AED)</label><input type="number" id="t-tollcost" step="any" value="0"></div>
-        <div><label>Toll Receipt #</label><input type="text" id="t-receipt" placeholder="3403041062610873221"></div>
+        <div><label>Toll Cost (AED)</label><input type="number" id="t-tollcost" step="any" placeholder="e.g. 420" value="0"></div>
+        <div><label>Toll Receipt #</label><input type="text" id="t-receipt" placeholder="e.g. 3403041062610873221"></div>
       </div>
       <button type="submit" style="width:100%;">Log Trip</button>
     </form>
