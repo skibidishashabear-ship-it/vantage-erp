@@ -849,4 +849,1706 @@
   });
 </script>
 </body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vantage ERP - Load Lion Transport</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --accent: #10B981;
+      --accent-light: #ECFDF5;
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --danger: #EF4444;
+      --blue: #3B82F6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 15px; -webkit-tap-highlight-color: transparent; }
+
+    /* Initial App Loading Screen (Prevents Login Flash) */
+    #initialLoader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: var(--bg);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+    .loader-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .loader-spinner {
+      width: 140px;
+      height: 4px;
+      background-color: var(--accent-light);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .loader-spinner::after {
+      content: '';
+      position: absolute;
+      left: -50%;
+      height: 100%;
+      width: 50%;
+      background-color: var(--accent);
+      border-radius: 4px;
+      animation: loadingBar 1s infinite ease-in-out;
+    }
+    @keyframes loadingBar {
+      0% { left: -50%; width: 30%; }
+      50% { width: 60%; }
+      100% { left: 100%; width: 30%; }
+    }
+    
+    /* App Workspace Container (Hidden until authenticated) */
+    #appContent { display: none; }
+
+    /* Header Grid Layout */
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; gap: 10px; }
+    .brand { font-size: 1.4rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: bold; padding: 10px 14px; border-radius: 6px; font-size: 0.9rem; }
+    .nav-links a.active { background: var(--accent-light); color: var(--accent); }
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .user-badge { background: #E2E8F0; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+
+    /* Mascot Animation */
+    .mascot { width: 38px; height: 38px; animation: float 4s ease-in-out infinite; }
+    .mascot-lg { width: 52px; height: 52px; animation: float 4s ease-in-out infinite; }
+    @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-4px) rotate(4deg); } 100% { transform: translateY(0px) rotate(0deg); } }
+
+    /* Cards & Layout */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.05); }
+    .card h3 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .card .val { font-size: 1.7rem; font-weight: bold; color: var(--text); margin-top: 4px; }
+    
+    /* Loading Bar CSS */
+    .progress-bar-container {
+      display: none;
+      width: 100%;
+      height: 6px;
+      background-color: var(--accent-light);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+      margin-bottom: 15px;
+    }
+    .progress-bar-fill {
+      width: 100%;
+      height: 100%;
+      background-color: var(--accent);
+      animation: loadingAnimation 1.2s infinite linear;
+      transform-origin: 0% 50%;
+    }
+    @keyframes loadingAnimation {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Charts */
+    .chart-container { position: relative; height: 200px; width: 100%; }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    
+    /* Mobile Touch Optimized Buttons & Forms */
+    button { background: var(--accent); color: white; border: none; padding: 12px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.95rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; touch-action: manipulation; }
+    button.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    button.danger { background: var(--danger); }
+    input, select { padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); width: 100%; font-size: 1rem; min-height: 44px; }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 12px; }
+    label { font-size: 0.8rem; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 4px; }
+
+    /* Tables & Responsive Wrapper */
+    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; background: var(--card-bg); font-size: 0.88rem; white-space: nowrap; }
+    th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--accent-light); color: var(--accent); }
+    .row-select { width: 22px; height: 22px; cursor: pointer; }
+
+    /* Slide-down Accordion Edit Panel */
+    .edit-row-panel { display: none; background: #F1F5F9; border-bottom: 2px solid var(--accent); }
+    .edit-row-panel.active { display: table-row; }
+    .edit-grid { padding: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 6px; margin: 10px; white-space: normal; }
+
+    /* Modals */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; padding: 15px; overflow-y: auto; }
+    .modal.active { display: flex; }
+    .modal-card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    
+    /* Clean Invoice Styles */
+    .invoice-wrapper { 
+      background: #FFFFFF !important; 
+      padding: 30px; 
+      width: 100%; 
+      max-width: 800px; 
+      font-family: Arial, Helvetica, sans-serif; 
+      color: #000000; 
+      border: 1px solid #CBD5E1; 
+      margin: 0 auto;
+      white-space: normal;
+    }
+    .inv-sub { text-align: center; font-size: 20px; font-weight: bold; margin: 10px 0 15px 0; letter-spacing: 2px; text-transform: uppercase; text-decoration: underline; }
+    .inv-meta { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; border-bottom: 1px solid #000; padding-bottom: 8px; margin-bottom: 15px; }
+    .inv-section { border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 15px; font-size: 13px; line-height: 1.5; }
+    .inv-section h4 { text-transform: uppercase; margin-bottom: 4px; text-decoration: underline; }
+    .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+    .inv-table th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 8px; text-align: left; background: transparent !important; color: #000 !important; font-weight: bold; }
+    .inv-table td { padding: 8px; border-bottom: 1px solid #E2E8F0; }
+    .inv-totals { text-align: right; font-size: 14px; margin-top: 15px; }
+    .inv-totals .grand-total { font-weight: bold; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 0; font-size: 16px; margin-top: 8px; }
+    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; }
+    .modal-actions { display: flex; gap: 10px; margin-bottom: 15px; }
+
+    /* Print View Rules */
+    @media print {
+      body * { visibility: hidden !important; background: transparent !important; box-shadow: none !important; }
+      .modal, .modal * { visibility: visible !important; }
+      .modal { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; padding: 0 !important; background: #ffffff !important; }
+      .invoice-wrapper { border: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; color: #000000 !important; }
+      .modal-actions { display: none !important; }
+      @page { margin: 15mm; size: auto; }
+    }
+    
+    @media (max-width: 600px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .header-actions { width: 100%; justify-content: space-between; }
+      body { padding: 10px; }
+      .invoice-wrapper { padding: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Startup Loading Overlay (Prevents FOUC/Login Flash) -->
+<div id="initialLoader">
+  <div class="loader-brand">
+    <svg class="mascot-lg" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="40" fill="#10B981" />
+      <circle cx="50" cy="50" r="30" fill="#ECFDF5" />
+      <path d="M35 45 Q50 65 65 45" stroke="#10B981" stroke-width="4" fill="none" />
+      <circle cx="40" cy="40" r="4" fill="#0F172A" />
+      <circle cx="60" cy="40" r="4" fill="#0F172A" />
+    </svg>
+    <span>Vantage ERP</span>
+  </div>
+  <div class="loader-spinner"></div>
+  <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">Loading workspace...</p>
+</div>
+
+<!-- Login Modal (Hidden by Default) -->
+<div class="modal" id="loginModal">
+  <div class="modal-card">
+    <h2 style="color:var(--accent); text-align:center; margin-bottom:10px;">Vantage ERP Access</h2>
+    <p style="color:var(--text-muted); font-size:0.88rem; text-align:center; margin-bottom:20px;">Select your account and enter password to log in.</p>
+    
+    <div style="margin-bottom: 12px;">
+      <label>Select Account</label>
+      <select id="userSelect"></select>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label>Password</label>
+      <input type="password" id="userPassword" placeholder="Enter password">
+    </div>
+
+    <button onclick="loginUser()" style="width:100%;">Login to Workspace</button>
+  </div>
+</div>
+
+<!-- Protected Workspace Container -->
+<main id="appContent">
+
+  <!-- Admin User Management Modal -->
+  <div class="modal" id="adminUserModal">
+    <div class="modal-card">
+      <h3 style="color:var(--accent); margin-bottom:15px;">Admin User Management</h3>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Create or modify user accounts across the system.</p>
+      
+      <div style="margin-bottom:10px;">
+        <label>Account Name</label>
+        <input type="text" id="adminNewName" placeholder="Full Name">
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>Password</label>
+        <input type="password" id="adminNewPass" placeholder="Password">
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button class="outline" onclick="closeAdminUserModal()">Cancel</button>
+        <button onclick="saveAdminNewAccount()">Save Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Details Modal -->
+  <div class="modal" id="detailsModal">
+    <div class="modal-card" style="max-width: 550px;">
+      <h3 style="color:var(--accent); margin-bottom:15px;">Freight Trip Details</h3>
+      <div id="detailsContent" style="font-size:0.9rem; line-height:1.6; display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+      <div style="margin-top:20px; text-align:right;">
+        <button class="outline" onclick="closeDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="brand">
+      <svg class="mascot" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="#10B981" />
+        <circle cx="50" cy="50" r="30" fill="#ECFDF5" />
+        <path d="M35 45 Q50 65 65 45" stroke="#10B981" stroke-width="4" fill="none" />
+        <circle cx="40" cy="40" r="4" fill="#0F172A" />
+        <circle cx="60" cy="40" r="4" fill="#0F172A" />
+      </svg>
+      Vantage ERP
+    </div>
+    <div class="nav-links">
+      <a href="#" class="active">Dashboard & Trips</a>
+      <a href="utilities.html">Expenses & Maintenance</a>
+    </div>
+    <div class="header-actions">
+      <span class="user-badge" id="activeUserDisplay">User: Guest</span>
+      <button class="outline" id="adminManageBtn" onclick="openAdminUserModal()" style="display:none; padding:6px 12px; min-height:36px; font-size:0.8rem;">Manage Users</button>
+      <button class="outline" onclick="logoutUser()" style="padding:6px 12px; min-height:36px; font-size:0.8rem;">Logout</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <div class="chart-header">
+        <h3>Revenue Analytics</h3>
+        <button class="outline" onclick="toggleChart('revenueChart')" style="padding:4px 8px; min-height:32px; font-size:0.8rem;">Toggle View</button>
+      </div>
+      <div class="chart-container" id="revenueChart-container">
+        <canvas id="revenueChart"></canvas>
+      </div>
+    </div>
+    <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+      <h3>Total Invoiced Revenue</h3>
+      <div class="val" id="total-revenue">0.00 AED</div>
+      <h3 style="margin-top: 15px;">Logged Trips</h3>
+      <div class="val" id="total-trips">0</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Log New Freight Trip</h3>
+    
+    <div id="loadingBar" class="progress-bar-container">
+      <div class="progress-bar-fill"></div>
+    </div>
+
+    <form id="tripForm" onsubmit="addTrip(event)" style="margin-top:10px;">
+      <div class="form-row">
+        <div><label>Delivery Date</label><input type="date" id="t-date" required></div>
+        <div><label>Invoice / Log Issue Date</label><input type="date" id="t-issuedate" required></div>
+        <div><label>Bill To (Logistics Partner)</label><input type="text" id="t-billto" placeholder="TurboTix Logistics L.L.C" required></div>
+        <div><label>Partner TRN</label><input type="text" id="t-trn" placeholder="104700974900003"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Partner Address</label><input type="text" id="t-address" placeholder="B10289, Al Quoz 3, Dubai"></div>
+        <div><label>End Client Name</label><input type="text" id="t-client" placeholder="Arab and India Spices FZC" required></div>
+        <div><label>Delivery Note #</label><input type="text" id="t-dn" placeholder="WB1-82546"></div>
+        <div><label>Vehicle Plate No.</label><input type="text" id="t-plate" placeholder="85017-J" required></div>
+      </div>
+      <div class="form-row">
+        <div><label>Origin (Load)</label><input type="text" id="t-origin" placeholder="Fujairah" required></div>
+        <div><label>Destination (Unload)</label><input type="text" id="t-dest" placeholder="Ajman" required></div>
+        <div><label>Freight Cost (AED)</label><input type="number" id="t-freight" step="any" required></div>
+        <div><label>Toll Name / Location</label><input type="text" id="t-tollname" placeholder="Al Dhaid (Sharjah)"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Toll Cost (AED)</label><input type="number" id="t-tollcost" step="any" value="0"></div>
+        <div><label>Toll Receipt #</label><input type="text" id="t-receipt" placeholder="3403041062610873221"></div>
+      </div>
+      <button type="submit" style="width:100%;">Log Trip</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top: 20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+      <h3>Trip Logs & Freight Invoicing</h3>
+      <button onclick="generateMultiInvoice()">Print Selected Invoices</button>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+            <th>Delivery Date</th>
+            <th>Issue Date</th>
+            <th>Bill To</th>
+            <th>Client & Route</th>
+            <th>Plate</th>
+            <th>Logged By</th>
+            <th>Total (AED)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tripsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Clean PDF Replica Modal -->
+  <div class="modal" id="invoiceModal">
+    <div>
+      <div class="modal-actions">
+        <button class="outline" onclick="closeInvoice()" style="background:white;">Close</button>
+        <button onclick="window.print()">Print PDF Invoice</button>
+      </div>
+      
+      <div class="invoice-wrapper">
+        <div class="inv-sub">INVOICE</div>
+        
+        <div class="inv-meta">
+          <div>INVOICE NO: <span id="inv-no">INV-2026-0001</span></div>
+          <div>ISSUE DATE: <span id="inv-date"></span></div>
+        </div>
+
+        <div class="inv-section">
+          <h4>BILL TO:</h4>
+          <strong id="inv-billto"></strong><br>
+          TRN: <span id="inv-trn"></span><br>
+          <span id="inv-address"></span>
+        </div>
+
+        <div class="inv-section">
+          <h4>CLIENT REFERENCE:</h4>
+          Client Name: <strong id="inv-client"></strong><br>
+          Delivery Note: <span id="inv-dn-display"></span><br>
+          Delivery Date: <span id="inv-deliv-date"></span><br>
+          Route: <span id="inv-route-display"></span><br>
+          Vehicle / Plate No: <span id="inv-plate-display"></span>
+        </div>
+
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>DESCRIPTION OF SERVICES</th>
+              <th style="text-align:center;">QTY</th>
+              <th style="text-align:right;">UNIT PRICE</th>
+              <th style="text-align:right;">TOTAL</th>
+            </tr>
+          </thead>
+          <tbody id="inv-items"></tbody>
+        </table>
+
+        <div class="inv-totals">
+          <div>SUBTOTAL: <span id="inv-subtotal"></span> AED</div>
+          <div class="grand-total">TOTAL DUE: <span id="inv-total"></span> AED</div>
+        </div>
+
+        <div class="stamp-container">
+          <div>
+            <strong>LOAD LION TRANSPORT L.L.C</strong><br><br><br>
+            Authorized Signature:<br><br>
+            ________________________
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDfYzDRXRd8DD7bPPznLqEsjn6shn1Obvc",
+    authDomain: "vantage-erp.firebaseapp.com",
+    projectId: "vantage-erp",
+    storageBucket: "vantage-erp.firebasestorage.app",
+    messagingSenderId: "291156677597",
+    appId: "1:291156677597:web:5680c5db276e7e3d9b5c34"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  let localData = { trips: [] };
+  let chartInstance = null;
+  let currentUser = localStorage.getItem('vantage_active_user') || null;
+
+  const DEFAULT_ACCOUNTS = {
+    "Administrator": "administrator",
+    "Rayyan Hussain": "myweirdahh4400",
+    "Khushi Muhammad": "kmc11223344"
+  };
+
+  function getAccountMap() {
+    const saved = localStorage.getItem('vantage_account_map');
+    if (!saved) {
+      localStorage.setItem('vantage_account_map', JSON.stringify(DEFAULT_ACCOUNTS));
+      return DEFAULT_ACCOUNTS;
+    }
+    return JSON.parse(saved);
+  }
+
+  function renderAccountDropdown() {
+    const select = document.getElementById('userSelect');
+    const accountMap = getAccountMap();
+    select.innerHTML = Object.keys(accountMap).map(name => `<option value="${name}">${name}</option>`).join('');
+  }
+
+  function loginUser() {
+    const name = document.getElementById('userSelect').value;
+    const pass = document.getElementById('userPassword').value;
+    const accountMap = getAccountMap();
+
+    if (accountMap[name] && accountMap[name] === pass) {
+      currentUser = name;
+      localStorage.setItem('vantage_active_user', currentUser);
+      document.getElementById('userPassword').value = '';
+      checkLoginState();
+    } else {
+      alert('Incorrect password for ' + name);
+    }
+  }
+
+  function logoutUser() {
+    localStorage.removeItem('vantage_active_user');
+    currentUser = null;
+    checkLoginState();
+  }
+
+  function updateUserUI() {
+    const activeBadge = document.getElementById('activeUserDisplay');
+    const adminBtn = document.getElementById('adminManageBtn');
+    
+    if (currentUser) {
+      activeBadge.innerText = `User: ${currentUser}`;
+      adminBtn.style.display = (currentUser === 'Administrator') ? 'inline-flex' : 'none';
+    } else {
+      activeBadge.innerText = `User: Guest`;
+      adminBtn.style.display = 'none';
+    }
+  }
+
+  function checkLoginState() {
+    renderAccountDropdown();
+    const appContent = document.getElementById('appContent');
+    const loginModal = document.getElementById('loginModal');
+    const loader = document.getElementById('initialLoader');
+
+    if (currentUser) {
+      loginModal.classList.remove('active');
+      appContent.style.display = 'block';
+      updateUserUI();
+    } else {
+      loginModal.classList.add('active');
+      appContent.style.display = 'none';
+    }
+
+    // Hide loading screen once state is settled
+    if (loader) {
+      loader.style.display = 'none';
+    }
+  }
+
+  function openAdminUserModal() {
+    if (currentUser !== 'Administrator') return alert('Access restricted to Administrator.');
+    document.getElementById('adminUserModal').classList.add('active');
+  }
+
+  function closeAdminUserModal() {
+    document.getElementById('adminUserModal').classList.remove('active');
+  }
+
+  function saveAdminNewAccount() {
+    const name = document.getElementById('adminNewName').value.trim();
+    const pass = document.getElementById('adminNewPass').value.trim();
+
+    if (!name || !pass) return alert('Please provide both account name and password.');
+
+    const accountMap = getAccountMap();
+    accountMap[name] = pass;
+    localStorage.setItem('vantage_account_map', JSON.stringify(accountMap));
+    
+    renderAccountDropdown();
+    document.getElementById('adminNewName').value = '';
+    document.getElementById('adminNewPass').value = '';
+    closeAdminUserModal();
+    alert(`Account "${name}" updated successfully!`);
+  }
+
+  function setToday() { 
+    const dateInput = document.getElementById('t-date');
+    const issueDateInput = document.getElementById('t-issuedate');
+    const today = new Date().toISOString().split('T')[0];
+    if (dateInput) dateInput.value = today;
+    if (issueDateInput) issueDateInput.value = today;
+  }
+
+  db.collection("trips").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+    localData.trips = [];
+    snapshot.forEach((doc) => {
+      localData.trips.push({ id: doc.id, ...doc.data() });
+    });
+    renderTrips();
+    updateDashboard();
+  }, (error) => {
+    console.error("Firestore Error: ", error);
+  });
+
+  async function addTrip(e) {
+    e.preventDefault();
+    if (!currentUser) return alert("Please log in first!");
+
+    const loader = document.getElementById('loadingBar');
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    
+    if (loader) loader.style.display = 'block';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Saving Log...';
+    }
+
+    const trip = {
+      timestamp: Date.now(),
+      invNo: `INV-2026-${String((localData.trips.length + 1)).padStart(4, '0')}`,
+      date: document.getElementById('t-date').value,
+      issueDate: document.getElementById('t-issuedate').value,
+      billto: document.getElementById('t-billto').value,
+      trn: document.getElementById('t-trn').value,
+      address: document.getElementById('t-address').value,
+      client: document.getElementById('t-client').value,
+      dn: document.getElementById('t-dn').value,
+      plate: document.getElementById('t-plate').value,
+      origin: document.getElementById('t-origin').value,
+      dest: document.getElementById('t-dest').value,
+      freight: parseFloat(document.getElementById('t-freight').value) || 0,
+      tollname: document.getElementById('t-tollname').value,
+      tollcost: parseFloat(document.getElementById('t-tollcost').value) || 0,
+      receipt: document.getElementById('t-receipt').value,
+      createdBy: currentUser
+    };
+
+    try {
+      await db.collection("trips").add(trip);
+      e.target.reset();
+      setToday();
+    } catch (err) {
+      alert("Error adding trip: " + err.message);
+    } finally {
+      if (loader) loader.style.display = 'none';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Log Trip';
+      }
+    }
+  }
+
+  function renderTrips() {
+    const tbody = document.getElementById('tripsBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    localData.trips.forEach(t => {
+      const total = (t.freight + t.tollcost).toFixed(2);
+      const formattedDelivDate = t.date ? t.date.split('-').reverse().join('/') : 'N/A';
+      const formattedIssueDate = t.issueDate ? t.issueDate.split('-').reverse().join('/') : formattedDelivDate;
+      
+      tbody.innerHTML += `
+        <tr>
+          <td><input type="checkbox" class="row-select" value="${t.id}"></td>
+          <td>${formattedDelivDate}</td>
+          <td>${formattedIssueDate}</td>
+          <td><strong>${t.billto}</strong></td>
+          <td>${t.client} <br><small style="color:var(--text-muted);">${t.origin} ➔ ${t.dest}</small></td>
+          <td>${t.plate}</td>
+          <td><small>${t.createdBy || 'System'}</small></td>
+          <td><strong>${total} AED</strong></td>
+          <td>
+            <button class="outline" onclick="showTripDetails('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Details</button>
+            <button class="outline" onclick="toggleEditAccordion('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Edit</button>
+            <button class="danger" onclick="deleteTrip('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Delete</button>
+          </td>
+        </tr>
+        <tr class="edit-row-panel" id="edit-panel-${t.id}">
+          <td colspan="9">
+            <div class="edit-grid">
+              <div><label>Invoice No.</label><input type="text" id="e-invNo-${t.id}" value="${t.invNo || ''}"></div>
+              <div><label>Delivery Date</label><input type="date" id="e-date-${t.id}" value="${t.date}"></div>
+              <div><label>Issue Date</label><input type="date" id="e-issuedate-${t.id}" value="${t.issueDate || t.date}"></div>
+              <div><label>Bill To</label><input type="text" id="e-billto-${t.id}" value="${t.billto}"></div>
+              <div><label>Partner TRN</label><input type="text" id="e-trn-${t.id}" value="${t.trn || ''}"></div>
+              <div><label>Partner Address</label><input type="text" id="e-address-${t.id}" value="${t.address || ''}"></div>
+              <div><label>End Client</label><input type="text" id="e-client-${t.id}" value="${t.client}"></div>
+              <div><label>Delivery Note #</label><input type="text" id="e-dn-${t.id}" value="${t.dn || ''}"></div>
+              <div><label>Plate No.</label><input type="text" id="e-plate-${t.id}" value="${t.plate}"></div>
+              <div><label>Origin</label><input type="text" id="e-origin-${t.id}" value="${t.origin}"></div>
+              <div><label>Destination</label><input type="text" id="e-dest-${t.id}" value="${t.dest}"></div>
+              <div><label>Freight Cost (AED)</label><input type="number" step="any" id="e-freight-${t.id}" value="${t.freight}"></div>
+              <div><label>Toll Name</label><input type="text" id="e-tollname-${t.id}" value="${t.tollname || ''}"></div>
+              <div><label>Toll Cost (AED)</label><input type="number" step="any" id="e-tollcost-${t.id}" value="${t.tollcost || 0}"></div>
+              <div><label>Toll Receipt #</label><input type="text" id="e-receipt-${t.id}" value="${t.receipt || ''}"></div>
+              <div style="grid-column: 1 / -1; display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+                <button class="outline" onclick="toggleEditAccordion('${t.id}')">Cancel</button>
+                <button onclick="saveAccordionEdit('${t.id}')">Save Changes</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  function showTripDetails(id) {
+    const t = localData.trips.find(item => item.id === id);
+    if (!t) return;
+    
+    const content = document.getElementById('detailsContent');
+    content.innerHTML = `
+      <div><strong>Invoice #:</strong> ${t.invNo || 'N/A'}</div>
+      <div><strong>Logged By:</strong> ${t.createdBy || 'System'}</div>
+      <div><strong>Delivery Date:</strong> ${t.date}</div>
+      <div><strong>Issue Date:</strong> ${t.issueDate || t.date}</div>
+      <div><strong>Bill To:</strong> ${t.billto}</div>
+      <div><strong>Partner TRN:</strong> ${t.trn || 'N/A'}</div>
+      <div style="grid-column:1/-1;"><strong>Partner Address:</strong> ${t.address || 'N/A'}</div>
+      <div><strong>Client:</strong> ${t.client}</div>
+      <div><strong>DN #:</strong> ${t.dn || 'N/A'}</div>
+      <div><strong>Vehicle Plate:</strong> ${t.plate}</div>
+      <div><strong>Route:</strong> ${t.origin} ➔ ${t.dest}</div>
+      <div><strong>Freight Cost:</strong> ${t.freight} AED</div>
+      <div><strong>Toll Tax:</strong> ${t.tollcost || 0} AED (${t.tollname || 'N/A'})</div>
+      <div style="grid-column:1/-1;"><strong>Toll Receipt #:</strong> ${t.receipt || 'N/A'}</div>
+    `;
+    document.getElementById('detailsModal').classList.add('active');
+  }
+
+  function closeDetailsModal() {
+    document.getElementById('detailsModal').classList.remove('active');
+  }
+
+  function toggleEditAccordion(id) {
+    document.getElementById(`edit-panel-${id}`).classList.toggle('active');
+  }
+
+  async function saveAccordionEdit(id) {
+    const updatedTrip = {
+      invNo: document.getElementById(`e-invNo-${id}`).value,
+      date: document.getElementById(`e-date-${id}`).value,
+      issueDate: document.getElementById(`e-issuedate-${id}`).value,
+      billto: document.getElementById(`e-billto-${id}`).value,
+      trn: document.getElementById(`e-trn-${id}`).value,
+      address: document.getElementById(`e-address-${id}`).value,
+      client: document.getElementById(`e-client-${id}`).value,
+      dn: document.getElementById(`e-dn-${id}`).value,
+      plate: document.getElementById(`e-plate-${id}`).value,
+      origin: document.getElementById(`e-origin-${id}`).value,
+      dest: document.getElementById(`e-dest-${id}`).value,
+      freight: parseFloat(document.getElementById(`e-freight-${id}`).value) || 0,
+      tollname: document.getElementById(`e-tollname-${id}`).value,
+      tollcost: parseFloat(document.getElementById(`e-tollcost-${id}`).value) || 0,
+      receipt: document.getElementById(`e-receipt-${id}`).value
+    };
+
+    try {
+      await db.collection("trips").doc(id).update(updatedTrip);
+    } catch (err) {
+      alert("Error updating record: " + err.message);
+    }
+  }
+
+  async function deleteTrip(id) {
+    if (confirm('Delete this trip record?')) {
+      try {
+        await db.collection("trips").doc(id).delete();
+      } catch (err) {
+        alert("Error deleting record: " + err.message);
+      }
+    }
+  }
+
+  function toggleSelectAll() {
+    const state = document.getElementById('selectAll').checked;
+    document.querySelectorAll('.row-select').forEach(cb => cb.checked = state);
+  }
+
+  function generateMultiInvoice() {
+    const selectedIds = Array.from(document.querySelectorAll('.row-select:checked')).map(cb => cb.value);
+    if (selectedIds.length === 0) return alert('Select at least one trip to generate an invoice.');
+    
+    const selectedTrips = localData.trips.filter(t => selectedIds.includes(t.id));
+    const baseTrip = selectedTrips[0];
+
+    document.getElementById('inv-no').innerText = baseTrip.invNo || 'INV-2026-0001';
+    
+    const issueDateStr = baseTrip.issueDate 
+      ? baseTrip.issueDate.split('-').reverse().join('/') 
+      : new Date().toLocaleDateString('en-GB');
+    document.getElementById('inv-date').innerText = issueDateStr;
+
+    document.getElementById('inv-billto').innerText = baseTrip.billto;
+    document.getElementById('inv-trn').innerText = baseTrip.trn || 'N/A';
+    document.getElementById('inv-address').innerText = baseTrip.address || '';
+    document.getElementById('inv-client').innerText = baseTrip.client;
+
+    const plates = [...new Set(selectedTrips.map(t => t.plate))].join(', ');
+    const dns = [...new Set(selectedTrips.map(t => t.dn).filter(Boolean))].join(', ');
+    const delivDates = [...new Set(selectedTrips.map(t => t.date.split('-').reverse().join('/')))].join(', ');
+    const routes = selectedTrips.map(t => `Origin (${t.origin}) to Destination (${t.dest})`).join('; ');
+    
+    document.getElementById('inv-plate-display').innerText = plates;
+    document.getElementById('inv-dn-display').innerText = dns || 'N/A';
+    document.getElementById('inv-deliv-date').innerText = delivDates;
+    document.getElementById('inv-route-display').innerText = routes;
+
+    const tbody = document.getElementById('inv-items');
+    tbody.innerHTML = '';
+    let subtotal = 0;
+
+    selectedTrips.forEach(t => {
+      tbody.innerHTML += `
+        <tr>
+          <td>Freight / Transportation Services</td>
+          <td style="text-align:center;">1</td>
+          <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
+          <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
+        </tr>
+      `;
+      subtotal += t.freight;
+      
+      if (t.tollcost > 0) {
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              Toll Tax: ${t.tollname || 'Salik'}<br>
+              <span style="font-size:11px; color:#555;">Receipt No: ${t.receipt || 'N/A'}</span>
+            </td>
+            <td style="text-align:center;">1</td>
+            <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+            <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+          </tr>
+        `;
+        subtotal += t.tollcost;
+      }
+    });
+
+    document.getElementById('inv-subtotal').innerText = subtotal.toFixed(2);
+    document.getElementById('inv-total').innerText = subtotal.toFixed(2);
+    
+    document.getElementById('invoiceModal').classList.add('active');
+  }
+
+  function closeInvoice() { document.getElementById('invoiceModal').classList.remove('active'); }
+
+  function updateDashboard() {
+    const totalRevEl = document.getElementById('total-revenue');
+    const totalTripsEl = document.getElementById('total-trips');
+    if (!totalRevEl || !totalTripsEl) return;
+
+    const totalRev = localData.trips.reduce((acc, t) => acc + t.freight + t.tollcost, 0);
+    totalRevEl.innerText = totalRev.toFixed(2) + ' AED';
+    totalTripsEl.innerText = localData.trips.length;
+    
+    const monthlyData = {};
+    localData.trips.forEach(t => {
+      const month = t.date ? t.date.substring(0, 7) : 'Unknown';
+      monthlyData[month] = (monthlyData[month] || 0) + t.freight + t.tollcost;
+    });
+
+    const chartEl = document.getElementById('revenueChart');
+    if (!chartEl) return;
+    
+    if (chartInstance) chartInstance.destroy();
+    const ctx = chartEl.getContext('2d');
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: Object.keys(monthlyData).length ? Object.keys(monthlyData) : ['No Data'],
+        datasets: [{
+          label: 'Revenue (AED)',
+          data: Object.keys(monthlyData).length ? Object.values(monthlyData) : [0],
+          borderColor: '#10B981', backgroundColor: '#ECFDF5', fill: true, tension: 0.3
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  function toggleChart(id) {
+    const container = document.getElementById(id + '-container');
+    container.style.display = container.style.display === 'none' ? 'block' : 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    checkLoginState();
+    setToday();
+  });
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Vantage ERP - Load Lion Transport</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --accent: #10B981;
+      --accent-light: #ECFDF5;
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+      --danger: #EF4444;
+      --blue: #3B82F6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 15px; -webkit-tap-highlight-color: transparent; }
+
+    /* Initial App Loading Screen (Prevents Login Flash) */
+    #initialLoader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: var(--bg);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+    .loader-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .loader-spinner {
+      width: 140px;
+      height: 4px;
+      background-color: var(--accent-light);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .loader-spinner::after {
+      content: '';
+      position: absolute;
+      left: -50%;
+      height: 100%;
+      width: 50%;
+      background-color: var(--accent);
+      border-radius: 4px;
+      animation: loadingBar 1s infinite ease-in-out;
+    }
+    @keyframes loadingBar {
+      0% { left: -50%; width: 30%; }
+      50% { width: 60%; }
+      100% { left: 100%; width: 30%; }
+    }
+    
+    /* App Workspace Container (Hidden until authenticated) */
+    #appContent { display: none; }
+
+    /* Header Grid Layout */
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; gap: 10px; }
+    .brand { font-size: 1.4rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: bold; padding: 10px 14px; border-radius: 6px; font-size: 0.9rem; }
+    .nav-links a.active { background: var(--accent-light); color: var(--accent); }
+    .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .user-badge { background: #E2E8F0; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+
+    /* Mascot Animation */
+    .mascot { width: 38px; height: 38px; animation: float 4s ease-in-out infinite; }
+    .mascot-lg { width: 52px; height: 52px; animation: float 4s ease-in-out infinite; }
+    @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-4px) rotate(4deg); } 100% { transform: translateY(0px) rotate(0deg); } }
+
+    /* Cards & Layout */
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.05); }
+    .card h3 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .card .val { font-size: 1.7rem; font-weight: bold; color: var(--text); margin-top: 4px; }
+    
+    /* Loading Bar CSS */
+    .progress-bar-container {
+      display: none;
+      width: 100%;
+      height: 6px;
+      background-color: var(--accent-light);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+      margin-bottom: 15px;
+    }
+    .progress-bar-fill {
+      width: 100%;
+      height: 100%;
+      background-color: var(--accent);
+      animation: loadingAnimation 1.2s infinite linear;
+      transform-origin: 0% 50%;
+    }
+    @keyframes loadingAnimation {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Charts */
+    .chart-container { position: relative; height: 200px; width: 100%; }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    
+    /* Mobile Touch Optimized Buttons & Forms */
+    button { background: var(--accent); color: white; border: none; padding: 12px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.95rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; touch-action: manipulation; }
+    button.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    button.danger { background: var(--danger); }
+    input, select { padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); width: 100%; font-size: 1rem; min-height: 44px; }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 12px; }
+    label { font-size: 0.8rem; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 4px; }
+
+    /* Tables & Responsive Wrapper */
+    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; background: var(--card-bg); font-size: 0.88rem; white-space: nowrap; }
+    th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+    th { background: var(--accent-light); color: var(--accent); }
+    .row-select { width: 22px; height: 22px; cursor: pointer; }
+
+    /* Slide-down Accordion Edit Panel */
+    .edit-row-panel { display: none; background: #F1F5F9; border-bottom: 2px solid var(--accent); }
+    .edit-row-panel.active { display: table-row; }
+    .edit-grid { padding: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 6px; margin: 10px; white-space: normal; }
+
+    /* Modals */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; padding: 15px; overflow-y: auto; }
+    .modal.active { display: flex; }
+    .modal-card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    
+    /* Clean Invoice Styles */
+    .invoice-wrapper { 
+      background: #FFFFFF !important; 
+      padding: 30px; 
+      width: 100%; 
+      max-width: 800px; 
+      font-family: Arial, Helvetica, sans-serif; 
+      color: #000000; 
+      border: 1px solid #CBD5E1; 
+      margin: 0 auto;
+      white-space: normal;
+    }
+    .inv-sub { text-align: center; font-size: 20px; font-weight: bold; margin: 10px 0 15px 0; letter-spacing: 2px; text-transform: uppercase; text-decoration: underline; }
+    .inv-meta { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; border-bottom: 1px solid #000; padding-bottom: 8px; margin-bottom: 15px; }
+    .inv-section { border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 15px; font-size: 13px; line-height: 1.5; }
+    .inv-section h4 { text-transform: uppercase; margin-bottom: 4px; text-decoration: underline; }
+    .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
+    .inv-table th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 8px; text-align: left; background: transparent !important; color: #000 !important; font-weight: bold; }
+    .inv-table td { padding: 8px; border-bottom: 1px solid #E2E8F0; }
+    .inv-totals { text-align: right; font-size: 14px; margin-top: 15px; }
+    .inv-totals .grand-total { font-weight: bold; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 0; font-size: 16px; margin-top: 8px; }
+    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; }
+    .modal-actions { display: flex; gap: 10px; margin-bottom: 15px; }
+
+    /* Print View Rules */
+    @media print {
+      body * { visibility: hidden !important; background: transparent !important; box-shadow: none !important; }
+      .modal, .modal * { visibility: visible !important; }
+      .modal { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; padding: 0 !important; background: #ffffff !important; }
+      .invoice-wrapper { border: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; color: #000000 !important; }
+      .modal-actions { display: none !important; }
+      @page { margin: 15mm; size: auto; }
+    }
+    
+    @media (max-width: 600px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .header-actions { width: 100%; justify-content: space-between; }
+      body { padding: 10px; }
+      .invoice-wrapper { padding: 15px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Startup Loading Overlay (Prevents FOUC/Login Flash) -->
+<div id="initialLoader">
+  <div class="loader-brand">
+    <svg class="mascot-lg" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="40" fill="#10B981" />
+      <circle cx="50" cy="50" r="30" fill="#ECFDF5" />
+      <path d="M35 45 Q50 65 65 45" stroke="#10B981" stroke-width="4" fill="none" />
+      <circle cx="40" cy="40" r="4" fill="#0F172A" />
+      <circle cx="60" cy="40" r="4" fill="#0F172A" />
+    </svg>
+    <span>Vantage ERP</span>
+  </div>
+  <div class="loader-spinner"></div>
+  <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">Loading workspace...</p>
+</div>
+
+<!-- Login Modal (Hidden by Default) -->
+<div class="modal" id="loginModal">
+  <div class="modal-card">
+    <h2 style="color:var(--accent); text-align:center; margin-bottom:10px;">Vantage ERP Access</h2>
+    <p style="color:var(--text-muted); font-size:0.88rem; text-align:center; margin-bottom:20px;">Select your account and enter password to log in.</p>
+    
+    <div style="margin-bottom: 12px;">
+      <label>Select Account</label>
+      <select id="userSelect"></select>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <label>Password</label>
+      <input type="password" id="userPassword" placeholder="Enter password">
+    </div>
+
+    <button onclick="loginUser()" style="width:100%;">Login to Workspace</button>
+  </div>
+</div>
+
+<!-- Protected Workspace Container -->
+<main id="appContent">
+
+  <!-- Admin User Management Modal -->
+  <div class="modal" id="adminUserModal">
+    <div class="modal-card">
+      <h3 style="color:var(--accent); margin-bottom:15px;">Admin User Management</h3>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Create or modify user accounts across the system.</p>
+      
+      <div style="margin-bottom:10px;">
+        <label>Account Name</label>
+        <input type="text" id="adminNewName" placeholder="Full Name">
+      </div>
+      <div style="margin-bottom:15px;">
+        <label>Password</label>
+        <input type="password" id="adminNewPass" placeholder="Password">
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:flex-end;">
+        <button class="outline" onclick="closeAdminUserModal()">Cancel</button>
+        <button onclick="saveAdminNewAccount()">Save Account</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Details Modal -->
+  <div class="modal" id="detailsModal">
+    <div class="modal-card" style="max-width: 550px;">
+      <h3 style="color:var(--accent); margin-bottom:15px;">Freight Trip Details</h3>
+      <div id="detailsContent" style="font-size:0.9rem; line-height:1.6; display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+      <div style="margin-top:20px; text-align:right;">
+        <button class="outline" onclick="closeDetailsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <header>
+    <div class="brand">
+      <svg class="mascot" viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="40" fill="#10B981" />
+        <circle cx="50" cy="50" r="30" fill="#ECFDF5" />
+        <path d="M35 45 Q50 65 65 45" stroke="#10B981" stroke-width="4" fill="none" />
+        <circle cx="40" cy="40" r="4" fill="#0F172A" />
+        <circle cx="60" cy="40" r="4" fill="#0F172A" />
+      </svg>
+      Vantage ERP
+    </div>
+    <div class="nav-links">
+      <a href="#" class="active">Dashboard & Trips</a>
+      <a href="utilities.html">Expenses & Maintenance</a>
+    </div>
+    <div class="header-actions">
+      <span class="user-badge" id="activeUserDisplay">User: Guest</span>
+      <button class="outline" id="adminManageBtn" onclick="openAdminUserModal()" style="display:none; padding:6px 12px; min-height:36px; font-size:0.8rem;">Manage Users</button>
+      <button class="outline" onclick="logoutUser()" style="padding:6px 12px; min-height:36px; font-size:0.8rem;">Logout</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <div class="chart-header">
+        <h3>Revenue Analytics</h3>
+        <button class="outline" onclick="toggleChart('revenueChart')" style="padding:4px 8px; min-height:32px; font-size:0.8rem;">Toggle View</button>
+      </div>
+      <div class="chart-container" id="revenueChart-container">
+        <canvas id="revenueChart"></canvas>
+      </div>
+    </div>
+    <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+      <h3>Total Invoiced Revenue</h3>
+      <div class="val" id="total-revenue">0.00 AED</div>
+      <h3 style="margin-top: 15px;">Logged Trips</h3>
+      <div class="val" id="total-trips">0</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Log New Freight Trip</h3>
+    
+    <div id="loadingBar" class="progress-bar-container">
+      <div class="progress-bar-fill"></div>
+    </div>
+
+    <form id="tripForm" onsubmit="addTrip(event)" style="margin-top:10px;">
+      <div class="form-row">
+        <div><label>Delivery Date</label><input type="date" id="t-date" required></div>
+        <div><label>Invoice / Log Issue Date</label><input type="date" id="t-issuedate" required></div>
+        <div><label>Bill To (Logistics Partner)</label><input type="text" id="t-billto" placeholder="TurboTix Logistics L.L.C" required></div>
+        <div><label>Partner TRN</label><input type="text" id="t-trn" placeholder="104700974900003"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Partner Address</label><input type="text" id="t-address" placeholder="B10289, Al Quoz 3, Dubai"></div>
+        <div><label>End Client Name</label><input type="text" id="t-client" placeholder="Arab and India Spices FZC" required></div>
+        <div><label>Delivery Note #</label><input type="text" id="t-dn" placeholder="WB1-82546"></div>
+        <div><label>Vehicle Plate No.</label><input type="text" id="t-plate" placeholder="85017-J" required></div>
+      </div>
+      <div class="form-row">
+        <div><label>Origin (Load)</label><input type="text" id="t-origin" placeholder="Fujairah" required></div>
+        <div><label>Destination (Unload)</label><input type="text" id="t-dest" placeholder="Ajman" required></div>
+        <div><label>Freight Cost (AED)</label><input type="number" id="t-freight" step="any" required></div>
+        <div><label>Toll Name / Location</label><input type="text" id="t-tollname" placeholder="Al Dhaid (Sharjah)"></div>
+      </div>
+      <div class="form-row">
+        <div><label>Toll Cost (AED)</label><input type="number" id="t-tollcost" step="any" value="0"></div>
+        <div><label>Toll Receipt #</label><input type="text" id="t-receipt" placeholder="3403041062610873221"></div>
+      </div>
+      <button type="submit" style="width:100%;">Log Trip</button>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top: 20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+      <h3>Trip Logs & Freight Invoicing</h3>
+      <button onclick="generateMultiInvoice()">Print Selected Invoices</button>
+    </div>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+            <th>Delivery Date</th>
+            <th>Issue Date</th>
+            <th>Bill To</th>
+            <th>Client & Route</th>
+            <th>Plate</th>
+            <th>Logged By</th>
+            <th>Total (AED)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tripsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Clean PDF Replica Modal -->
+  <div class="modal" id="invoiceModal">
+    <div>
+      <div class="modal-actions">
+        <button class="outline" onclick="closeInvoice()" style="background:white;">Close</button>
+        <button onclick="window.print()">Print PDF Invoice</button>
+      </div>
+      
+      <div class="invoice-wrapper">
+        <div class="inv-sub">INVOICE</div>
+        
+        <div class="inv-meta">
+          <div>INVOICE NO: <span id="inv-no">INV-2026-0001</span></div>
+          <div>ISSUE DATE: <span id="inv-date"></span></div>
+        </div>
+
+        <div class="inv-section">
+          <h4>BILL TO:</h4>
+          <strong id="inv-billto"></strong><br>
+          TRN: <span id="inv-trn"></span><br>
+          <span id="inv-address"></span>
+        </div>
+
+        <div class="inv-section">
+          <h4>CLIENT REFERENCE:</h4>
+          Client Name: <strong id="inv-client"></strong><br>
+          Delivery Note: <span id="inv-dn-display"></span><br>
+          Delivery Date: <span id="inv-deliv-date"></span><br>
+          Route: <span id="inv-route-display"></span><br>
+          Vehicle / Plate No: <span id="inv-plate-display"></span>
+        </div>
+
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>DESCRIPTION OF SERVICES</th>
+              <th style="text-align:center;">QTY</th>
+              <th style="text-align:right;">UNIT PRICE</th>
+              <th style="text-align:right;">TOTAL</th>
+            </tr>
+          </thead>
+          <tbody id="inv-items"></tbody>
+        </table>
+
+        <div class="inv-totals">
+          <div>SUBTOTAL: <span id="inv-subtotal"></span> AED</div>
+          <div class="grand-total">TOTAL DUE: <span id="inv-total"></span> AED</div>
+        </div>
+
+        <div class="stamp-container">
+          <div>
+            <strong>LOAD LION TRANSPORT L.L.C</strong><br><br><br>
+            Authorized Signature:<br><br>
+            ________________________
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDfYzDRXRd8DD7bPPznLqEsjn6shn1Obvc",
+    authDomain: "vantage-erp.firebaseapp.com",
+    projectId: "vantage-erp",
+    storageBucket: "vantage-erp.firebasestorage.app",
+    messagingSenderId: "291156677597",
+    appId: "1:291156677597:web:5680c5db276e7e3d9b5c34"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  let localData = { trips: [] };
+  let chartInstance = null;
+  let currentUser = localStorage.getItem('vantage_active_user') || null;
+
+  const DEFAULT_ACCOUNTS = {
+    "Administrator": "administrator",
+    "Rayyan Hussain": "myweirdahh4400",
+    "Khushi Muhammad": "kmc11223344"
+  };
+
+  function getAccountMap() {
+    const saved = localStorage.getItem('vantage_account_map');
+    if (!saved) {
+      localStorage.setItem('vantage_account_map', JSON.stringify(DEFAULT_ACCOUNTS));
+      return DEFAULT_ACCOUNTS;
+    }
+    return JSON.parse(saved);
+  }
+
+  function renderAccountDropdown() {
+    const select = document.getElementById('userSelect');
+    const accountMap = getAccountMap();
+    select.innerHTML = Object.keys(accountMap).map(name => `<option value="${name}">${name}</option>`).join('');
+  }
+
+  function loginUser() {
+    const name = document.getElementById('userSelect').value;
+    const pass = document.getElementById('userPassword').value;
+    const accountMap = getAccountMap();
+
+    if (accountMap[name] && accountMap[name] === pass) {
+      currentUser = name;
+      localStorage.setItem('vantage_active_user', currentUser);
+      document.getElementById('userPassword').value = '';
+      checkLoginState();
+    } else {
+      alert('Incorrect password for ' + name);
+    }
+  }
+
+  function logoutUser() {
+    localStorage.removeItem('vantage_active_user');
+    currentUser = null;
+    checkLoginState();
+  }
+
+  function updateUserUI() {
+    const activeBadge = document.getElementById('activeUserDisplay');
+    const adminBtn = document.getElementById('adminManageBtn');
+    
+    if (currentUser) {
+      activeBadge.innerText = `User: ${currentUser}`;
+      adminBtn.style.display = (currentUser === 'Administrator') ? 'inline-flex' : 'none';
+    } else {
+      activeBadge.innerText = `User: Guest`;
+      adminBtn.style.display = 'none';
+    }
+  }
+
+  function checkLoginState() {
+    renderAccountDropdown();
+    const appContent = document.getElementById('appContent');
+    const loginModal = document.getElementById('loginModal');
+    const loader = document.getElementById('initialLoader');
+
+    if (currentUser) {
+      loginModal.classList.remove('active');
+      appContent.style.display = 'block';
+      updateUserUI();
+    } else {
+      loginModal.classList.add('active');
+      appContent.style.display = 'none';
+    }
+
+    // Hide loading screen once state is settled
+    if (loader) {
+      loader.style.display = 'none';
+    }
+  }
+
+  function openAdminUserModal() {
+    if (currentUser !== 'Administrator') return alert('Access restricted to Administrator.');
+    document.getElementById('adminUserModal').classList.add('active');
+  }
+
+  function closeAdminUserModal() {
+    document.getElementById('adminUserModal').classList.remove('active');
+  }
+
+  function saveAdminNewAccount() {
+    const name = document.getElementById('adminNewName').value.trim();
+    const pass = document.getElementById('adminNewPass').value.trim();
+
+    if (!name || !pass) return alert('Please provide both account name and password.');
+
+    const accountMap = getAccountMap();
+    accountMap[name] = pass;
+    localStorage.setItem('vantage_account_map', JSON.stringify(accountMap));
+    
+    renderAccountDropdown();
+    document.getElementById('adminNewName').value = '';
+    document.getElementById('adminNewPass').value = '';
+    closeAdminUserModal();
+    alert(`Account "${name}" updated successfully!`);
+  }
+
+  function setToday() { 
+    const dateInput = document.getElementById('t-date');
+    const issueDateInput = document.getElementById('t-issuedate');
+    const today = new Date().toISOString().split('T')[0];
+    if (dateInput) dateInput.value = today;
+    if (issueDateInput) issueDateInput.value = today;
+  }
+
+  db.collection("trips").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+    localData.trips = [];
+    snapshot.forEach((doc) => {
+      localData.trips.push({ id: doc.id, ...doc.data() });
+    });
+    renderTrips();
+    updateDashboard();
+  }, (error) => {
+    console.error("Firestore Error: ", error);
+  });
+
+  async function addTrip(e) {
+    e.preventDefault();
+    if (!currentUser) return alert("Please log in first!");
+
+    const loader = document.getElementById('loadingBar');
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    
+    if (loader) loader.style.display = 'block';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Saving Log...';
+    }
+
+    const trip = {
+      timestamp: Date.now(),
+      invNo: `INV-2026-${String((localData.trips.length + 1)).padStart(4, '0')}`,
+      date: document.getElementById('t-date').value,
+      issueDate: document.getElementById('t-issuedate').value,
+      billto: document.getElementById('t-billto').value,
+      trn: document.getElementById('t-trn').value,
+      address: document.getElementById('t-address').value,
+      client: document.getElementById('t-client').value,
+      dn: document.getElementById('t-dn').value,
+      plate: document.getElementById('t-plate').value,
+      origin: document.getElementById('t-origin').value,
+      dest: document.getElementById('t-dest').value,
+      freight: parseFloat(document.getElementById('t-freight').value) || 0,
+      tollname: document.getElementById('t-tollname').value,
+      tollcost: parseFloat(document.getElementById('t-tollcost').value) || 0,
+      receipt: document.getElementById('t-receipt').value,
+      createdBy: currentUser
+    };
+
+    try {
+      await db.collection("trips").add(trip);
+      e.target.reset();
+      setToday();
+    } catch (err) {
+      alert("Error adding trip: " + err.message);
+    } finally {
+      if (loader) loader.style.display = 'none';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Log Trip';
+      }
+    }
+  }
+
+  function renderTrips() {
+    const tbody = document.getElementById('tripsBody');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    localData.trips.forEach(t => {
+      const total = (t.freight + t.tollcost).toFixed(2);
+      const formattedDelivDate = t.date ? t.date.split('-').reverse().join('/') : 'N/A';
+      const formattedIssueDate = t.issueDate ? t.issueDate.split('-').reverse().join('/') : formattedDelivDate;
+      
+      tbody.innerHTML += `
+        <tr>
+          <td><input type="checkbox" class="row-select" value="${t.id}"></td>
+          <td>${formattedDelivDate}</td>
+          <td>${formattedIssueDate}</td>
+          <td><strong>${t.billto}</strong></td>
+          <td>${t.client} <br><small style="color:var(--text-muted);">${t.origin} ➔ ${t.dest}</small></td>
+          <td>${t.plate}</td>
+          <td><small>${t.createdBy || 'System'}</small></td>
+          <td><strong>${total} AED</strong></td>
+          <td>
+            <button class="outline" onclick="showTripDetails('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Details</button>
+            <button class="outline" onclick="toggleEditAccordion('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Edit</button>
+            <button class="danger" onclick="deleteTrip('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Delete</button>
+          </td>
+        </tr>
+        <tr class="edit-row-panel" id="edit-panel-${t.id}">
+          <td colspan="9">
+            <div class="edit-grid">
+              <div><label>Invoice No.</label><input type="text" id="e-invNo-${t.id}" value="${t.invNo || ''}"></div>
+              <div><label>Delivery Date</label><input type="date" id="e-date-${t.id}" value="${t.date}"></div>
+              <div><label>Issue Date</label><input type="date" id="e-issuedate-${t.id}" value="${t.issueDate || t.date}"></div>
+              <div><label>Bill To</label><input type="text" id="e-billto-${t.id}" value="${t.billto}"></div>
+              <div><label>Partner TRN</label><input type="text" id="e-trn-${t.id}" value="${t.trn || ''}"></div>
+              <div><label>Partner Address</label><input type="text" id="e-address-${t.id}" value="${t.address || ''}"></div>
+              <div><label>End Client</label><input type="text" id="e-client-${t.id}" value="${t.client}"></div>
+              <div><label>Delivery Note #</label><input type="text" id="e-dn-${t.id}" value="${t.dn || ''}"></div>
+              <div><label>Plate No.</label><input type="text" id="e-plate-${t.id}" value="${t.plate}"></div>
+              <div><label>Origin</label><input type="text" id="e-origin-${t.id}" value="${t.origin}"></div>
+              <div><label>Destination</label><input type="text" id="e-dest-${t.id}" value="${t.dest}"></div>
+              <div><label>Freight Cost (AED)</label><input type="number" step="any" id="e-freight-${t.id}" value="${t.freight}"></div>
+              <div><label>Toll Name</label><input type="text" id="e-tollname-${t.id}" value="${t.tollname || ''}"></div>
+              <div><label>Toll Cost (AED)</label><input type="number" step="any" id="e-tollcost-${t.id}" value="${t.tollcost || 0}"></div>
+              <div><label>Toll Receipt #</label><input type="text" id="e-receipt-${t.id}" value="${t.receipt || ''}"></div>
+              <div style="grid-column: 1 / -1; display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+                <button class="outline" onclick="toggleEditAccordion('${t.id}')">Cancel</button>
+                <button onclick="saveAccordionEdit('${t.id}')">Save Changes</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  function showTripDetails(id) {
+    const t = localData.trips.find(item => item.id === id);
+    if (!t) return;
+    
+    const content = document.getElementById('detailsContent');
+    content.innerHTML = `
+      <div><strong>Invoice #:</strong> ${t.invNo || 'N/A'}</div>
+      <div><strong>Logged By:</strong> ${t.createdBy || 'System'}</div>
+      <div><strong>Delivery Date:</strong> ${t.date}</div>
+      <div><strong>Issue Date:</strong> ${t.issueDate || t.date}</div>
+      <div><strong>Bill To:</strong> ${t.billto}</div>
+      <div><strong>Partner TRN:</strong> ${t.trn || 'N/A'}</div>
+      <div style="grid-column:1/-1;"><strong>Partner Address:</strong> ${t.address || 'N/A'}</div>
+      <div><strong>Client:</strong> ${t.client}</div>
+      <div><strong>DN #:</strong> ${t.dn || 'N/A'}</div>
+      <div><strong>Vehicle Plate:</strong> ${t.plate}</div>
+      <div><strong>Route:</strong> ${t.origin} ➔ ${t.dest}</div>
+      <div><strong>Freight Cost:</strong> ${t.freight} AED</div>
+      <div><strong>Toll Tax:</strong> ${t.tollcost || 0} AED (${t.tollname || 'N/A'})</div>
+      <div style="grid-column:1/-1;"><strong>Toll Receipt #:</strong> ${t.receipt || 'N/A'}</div>
+    `;
+    document.getElementById('detailsModal').classList.add('active');
+  }
+
+  function closeDetailsModal() {
+    document.getElementById('detailsModal').classList.remove('active');
+  }
+
+  function toggleEditAccordion(id) {
+    document.getElementById(`edit-panel-${id}`).classList.toggle('active');
+  }
+
+  async function saveAccordionEdit(id) {
+    const updatedTrip = {
+      invNo: document.getElementById(`e-invNo-${id}`).value,
+      date: document.getElementById(`e-date-${id}`).value,
+      issueDate: document.getElementById(`e-issuedate-${id}`).value,
+      billto: document.getElementById(`e-billto-${id}`).value,
+      trn: document.getElementById(`e-trn-${id}`).value,
+      address: document.getElementById(`e-address-${id}`).value,
+      client: document.getElementById(`e-client-${id}`).value,
+      dn: document.getElementById(`e-dn-${id}`).value,
+      plate: document.getElementById(`e-plate-${id}`).value,
+      origin: document.getElementById(`e-origin-${id}`).value,
+      dest: document.getElementById(`e-dest-${id}`).value,
+      freight: parseFloat(document.getElementById(`e-freight-${id}`).value) || 0,
+      tollname: document.getElementById(`e-tollname-${id}`).value,
+      tollcost: parseFloat(document.getElementById(`e-tollcost-${id}`).value) || 0,
+      receipt: document.getElementById(`e-receipt-${id}`).value
+    };
+
+    try {
+      await db.collection("trips").doc(id).update(updatedTrip);
+    } catch (err) {
+      alert("Error updating record: " + err.message);
+    }
+  }
+
+  async function deleteTrip(id) {
+    if (confirm('Delete this trip record?')) {
+      try {
+        await db.collection("trips").doc(id).delete();
+      } catch (err) {
+        alert("Error deleting record: " + err.message);
+      }
+    }
+  }
+
+  function toggleSelectAll() {
+    const state = document.getElementById('selectAll').checked;
+    document.querySelectorAll('.row-select').forEach(cb => cb.checked = state);
+  }
+
+  function generateMultiInvoice() {
+    const selectedIds = Array.from(document.querySelectorAll('.row-select:checked')).map(cb => cb.value);
+    if (selectedIds.length === 0) return alert('Select at least one trip to generate an invoice.');
+    
+    const selectedTrips = localData.trips.filter(t => selectedIds.includes(t.id));
+    const baseTrip = selectedTrips[0];
+
+    document.getElementById('inv-no').innerText = baseTrip.invNo || 'INV-2026-0001';
+    
+    const issueDateStr = baseTrip.issueDate 
+      ? baseTrip.issueDate.split('-').reverse().join('/') 
+      : new Date().toLocaleDateString('en-GB');
+    document.getElementById('inv-date').innerText = issueDateStr;
+
+    document.getElementById('inv-billto').innerText = baseTrip.billto;
+    document.getElementById('inv-trn').innerText = baseTrip.trn || 'N/A';
+    document.getElementById('inv-address').innerText = baseTrip.address || '';
+    document.getElementById('inv-client').innerText = baseTrip.client;
+
+    const plates = [...new Set(selectedTrips.map(t => t.plate))].join(', ');
+    const dns = [...new Set(selectedTrips.map(t => t.dn).filter(Boolean))].join(', ');
+    const delivDates = [...new Set(selectedTrips.map(t => t.date.split('-').reverse().join('/')))].join(', ');
+    const routes = selectedTrips.map(t => `Origin (${t.origin}) to Destination (${t.dest})`).join('; ');
+    
+    document.getElementById('inv-plate-display').innerText = plates;
+    document.getElementById('inv-dn-display').innerText = dns || 'N/A';
+    document.getElementById('inv-deliv-date').innerText = delivDates;
+    document.getElementById('inv-route-display').innerText = routes;
+
+    const tbody = document.getElementById('inv-items');
+    tbody.innerHTML = '';
+    let subtotal = 0;
+
+    selectedTrips.forEach(t => {
+      tbody.innerHTML += `
+        <tr>
+          <td>Freight / Transportation Services</td>
+          <td style="text-align:center;">1</td>
+          <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
+          <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
+        </tr>
+      `;
+      subtotal += t.freight;
+      
+      if (t.tollcost > 0) {
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              Toll Tax: ${t.tollname || 'Salik'}<br>
+              <span style="font-size:11px; color:#555;">Receipt No: ${t.receipt || 'N/A'}</span>
+            </td>
+            <td style="text-align:center;">1</td>
+            <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+            <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+          </tr>
+        `;
+        subtotal += t.tollcost;
+      }
+    });
+
+    document.getElementById('inv-subtotal').innerText = subtotal.toFixed(2);
+    document.getElementById('inv-total').innerText = subtotal.toFixed(2);
+    
+    document.getElementById('invoiceModal').classList.add('active');
+  }
+
+  function closeInvoice() { document.getElementById('invoiceModal').classList.remove('active'); }
+
+  function updateDashboard() {
+    const totalRevEl = document.getElementById('total-revenue');
+    const totalTripsEl = document.getElementById('total-trips');
+    if (!totalRevEl || !totalTripsEl) return;
+
+    const totalRev = localData.trips.reduce((acc, t) => acc + t.freight + t.tollcost, 0);
+    totalRevEl.innerText = totalRev.toFixed(2) + ' AED';
+    totalTripsEl.innerText = localData.trips.length;
+    
+    const monthlyData = {};
+    localData.trips.forEach(t => {
+      const month = t.date ? t.date.substring(0, 7) : 'Unknown';
+      monthlyData[month] = (monthlyData[month] || 0) + t.freight + t.tollcost;
+    });
+
+    const chartEl = document.getElementById('revenueChart');
+    if (!chartEl) return;
+    
+    if (chartInstance) chartInstance.destroy();
+    const ctx = chartEl.getContext('2d');
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: Object.keys(monthlyData).length ? Object.keys(monthlyData) : ['No Data'],
+        datasets: [{
+          label: 'Revenue (AED)',
+          data: Object.keys(monthlyData).length ? Object.values(monthlyData) : [0],
+          borderColor: '#10B981', backgroundColor: '#ECFDF5', fill: true, tension: 0.3
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  function toggleChart(id) {
+    const container = document.getElementById(id + '-container');
+    container.style.display = container.style.display === 'none' ? 'block' : 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    checkLoginState();
+    setToday();
+  });
+</script>
+</body>
 </html>
