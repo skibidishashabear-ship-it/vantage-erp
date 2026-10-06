@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Vantage ERP - Load Lion Transport</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Firebase Compatibility SDKs -->
@@ -20,27 +20,27 @@
       --danger: #EF4444;
       --blue: #3B82F6;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 20px; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 15px; -webkit-tap-highlight-color: transparent; }
     
-    /* Header Grid Layout for Centered Navigation */
-    header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
-    .brand { font-size: 1.5rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 10px; }
-    .nav-links { display: flex; justify-content: center; gap: 10px; }
-    .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: bold; padding: 8px 16px; border-radius: 6px; }
+    /* Header Grid Layout */
+    header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; gap: 10px; }
+    .brand { font-size: 1.4rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    .nav-links { display: flex; gap: 8px; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: bold; padding: 10px 14px; border-radius: 6px; font-size: 0.9rem; }
     .nav-links a.active { background: var(--accent-light); color: var(--accent); }
-    .nav-links a:hover { background: var(--border); }
-    .header-actions { display: flex; justify-content: flex-end; gap: 10px; }
-    
+    .header-actions { display: flex; align-items: center; gap: 10px; }
+    .user-badge { background: #E2E8F0; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
+
     /* Mascot Animation */
-    .mascot { width: 45px; height: 45px; animation: float 4s ease-in-out infinite; }
-    @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-6px) rotate(4deg); } 100% { transform: translateY(0px) rotate(0deg); } }
+    .mascot { width: 38px; height: 38px; animation: float 4s ease-in-out infinite; }
+    @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-4px) rotate(4deg); } 100% { transform: translateY(0px) rotate(0deg); } }
 
     /* Cards & Layout */
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px; }
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 15px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.05); }
-    .card h3 { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; }
-    .card .val { font-size: 1.8rem; font-weight: bold; color: var(--text); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.05); }
+    .card h3 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .card .val { font-size: 1.7rem; font-weight: bold; color: var(--text); margin-top: 4px; }
     
     /* Loading Bar CSS */
     .progress-bar-container {
@@ -66,101 +66,113 @@
     }
 
     /* Charts */
-    .chart-container { position: relative; height: 220px; width: 100%; }
+    .chart-container { position: relative; height: 200px; width: 100%; }
     .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     
-    /* Buttons & Forms */
-    button { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    /* Mobile Touch Optimized Buttons & Forms */
+    button { background: var(--accent); color: white; border: none; padding: 12px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.95rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; touch-action: manipulation; }
     button.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
     button.danger { background: var(--danger); }
-    input, select { padding: 8px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg); color: var(--text); width: 100%; }
-    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 15px; }
+    input, select { padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); width: 100%; font-size: 1rem; min-height: 44px; }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 12px; }
+    label { font-size: 0.8rem; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 4px; }
 
-    /* Tables */
-    table { width: 100%; border-collapse: collapse; background: var(--card-bg); font-size: 0.9rem; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+    /* Tables & Responsive Wrapper */
+    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; background: var(--card-bg); font-size: 0.88rem; white-space: nowrap; }
+    th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
     th { background: var(--accent-light); color: var(--accent); }
-    .row-select { width: 18px; height: 18px; cursor: pointer; }
+    .row-select { width: 22px; height: 22px; cursor: pointer; }
 
     /* Slide-down Accordion Edit Panel */
     .edit-row-panel { display: none; background: #F1F5F9; border-bottom: 2px solid var(--accent); }
     .edit-row-panel.active { display: table-row; }
-    .edit-grid { padding: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 6px; margin: 10px; }
-    .edit-grid label { font-size: 0.75rem; font-weight: bold; color: var(--text-muted); }
+    .edit-grid { padding: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 6px; margin: 10px; white-space: normal; }
 
-    /* Modal Wrapper */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 100; justify-content: center; padding: 20px; overflow-y: auto; }
+    /* Modals */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; padding: 15px; overflow-y: auto; }
     .modal.active { display: flex; }
+    .modal-card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     
     /* Clean Invoice Styles */
     .invoice-wrapper { 
       background: #FFFFFF !important; 
-      padding: 40px; 
+      padding: 30px; 
       width: 100%; 
       max-width: 800px; 
       font-family: Arial, Helvetica, sans-serif; 
       color: #000000; 
       border: 1px solid #CBD5E1; 
       margin: 0 auto;
+      white-space: normal;
     }
     .inv-sub { text-align: center; font-size: 20px; font-weight: bold; margin: 10px 0 15px 0; letter-spacing: 2px; text-transform: uppercase; text-decoration: underline; }
-    
     .inv-meta { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; border-bottom: 1px solid #000; padding-bottom: 8px; margin-bottom: 15px; }
     .inv-section { border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 15px; font-size: 13px; line-height: 1.5; }
     .inv-section h4 { text-transform: uppercase; margin-bottom: 4px; text-decoration: underline; }
-    
     .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
     .inv-table th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 8px; text-align: left; background: transparent !important; color: #000 !important; font-weight: bold; }
     .inv-table td { padding: 8px; border-bottom: 1px solid #E2E8F0; }
-    
     .inv-totals { text-align: right; font-size: 14px; margin-top: 15px; }
     .inv-totals .grand-total { font-weight: bold; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 0; font-size: 16px; margin-top: 8px; }
-    
-    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 50px; }
-
+    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; }
     .modal-actions { display: flex; gap: 10px; margin-bottom: 15px; }
 
     /* Print View Rules */
     @media print {
-      body * {
-        visibility: hidden !important;
-        background: transparent !important;
-        background-image: none !important;
-        box-shadow: none !important;
-      }
-      .modal, .modal * {
-        visibility: visible !important;
-      }
-      .modal {
-        position: absolute !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        height: auto !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        background: #ffffff !important;
-      }
-      .invoice-wrapper {
-        border: none !important;
-        width: 100% !important;
-        max-width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        background: #ffffff !important;
-        color: #000000 !important;
-      }
-      .modal-actions {
-        display: none !important;
-      }
-      @page {
-        margin: 15mm;
-        size: auto;
-      }
+      body * { visibility: hidden !important; background: transparent !important; box-shadow: none !important; }
+      .modal, .modal * { visibility: visible !important; }
+      .modal { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; padding: 0 !important; background: #ffffff !important; }
+      .invoice-wrapper { border: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; color: #000000 !important; }
+      .modal-actions { display: none !important; }
+      @page { margin: 15mm; size: auto; }
+    }
+    
+    @media (max-width: 600px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .header-actions { width: 100%; justify-content: space-between; }
+      body { padding: 10px; }
+      .invoice-wrapper { padding: 15px; }
     }
   </style>
 </head>
 <body>
+
+<!-- Login Modal -->
+<div class="modal active" id="loginModal">
+  <div class="modal-card">
+    <h2 style="color:var(--accent); text-align:center; margin-bottom:10px;">🔐 Vantage ERP Access</h2>
+    <p style="color:var(--text-muted); font-size:0.88rem; text-align:center; margin-bottom:20px;">Select or add a local profile to start logging trips.</p>
+    
+    <div style="margin-bottom: 15px;">
+      <label>Select Local Account</label>
+      <select id="userSelect"></select>
+    </div>
+
+    <button onclick="loginUser()" style="width:100%; margin-bottom:15px;">🔓 Login to Workspace</button>
+    
+    <hr style="border:none; border-top:1px solid var(--border); margin:15px 0;">
+    
+    <details style="font-size:0.85rem; color:var(--text-muted);">
+      <summary style="cursor:pointer; font-weight:bold;">➕ Manage / Add Local Account</summary>
+      <div style="margin-top:10px;">
+        <input type="text" id="newAccountName" placeholder="Enter Full Name (e.g. John Doe)" style="margin-bottom:8px;">
+        <button onclick="addLocalAccount()" class="outline" style="width:100%;">Create Local Profile</button>
+      </div>
+    </details>
+  </div>
+</div>
+
+<!-- Details Modal -->
+<div class="modal" id="detailsModal">
+  <div class="modal-card" style="max-width: 550px;">
+    <h3 style="color:var(--accent); margin-bottom:15px;">📋 Freight Trip Details</h3>
+    <div id="detailsContent" style="font-size:0.9rem; line-height:1.6; display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
+    <div style="margin-top:20px; text-align:right;">
+      <button class="outline" onclick="closeDetailsModal()">Close</button>
+    </div>
+  </div>
+</div>
 
 <header>
   <div class="brand">
@@ -178,7 +190,8 @@
     <a href="utilities.html">Expenses & Maintenance</a>
   </div>
   <div class="header-actions">
-    <button class="outline" onclick="exportData()">💾 Export JSON</button>
+    <span class="user-badge" id="activeUserDisplay">👤 Guest</span>
+    <button class="outline" onclick="logoutUser()" style="padding:6px 12px; min-height:36px; font-size:0.8rem;">Logout</button>
   </div>
 </header>
 
@@ -186,7 +199,7 @@
   <div class="card">
     <div class="chart-header">
       <h3>Revenue Analytics</h3>
-      <button class="outline" onclick="toggleChart('revenueChart')">👁️ Toggle</button>
+      <button class="outline" onclick="toggleChart('revenueChart')" style="padding:4px 8px; min-height:32px; font-size:0.8rem;">👁️ Toggle</button>
     </div>
     <div class="chart-container" id="revenueChart-container">
       <canvas id="revenueChart"></canvas>
@@ -207,7 +220,7 @@
     <div class="progress-bar-fill"></div>
   </div>
 
-  <form id="tripForm" onsubmit="addTrip(event)">
+  <form id="tripForm" onsubmit="addTrip(event)" style="margin-top:10px;">
     <div class="form-row">
       <div><label>Delivery Date</label><input type="date" id="t-date" required></div>
       <div><label>Invoice / Log Issue Date</label><input type="date" id="t-issuedate" required></div>
@@ -230,30 +243,33 @@
       <div><label>Toll Cost (AED)</label><input type="number" id="t-tollcost" step="any" value="0"></div>
       <div><label>Toll Receipt #</label><input type="text" id="t-receipt" placeholder="3403041062610873221"></div>
     </div>
-    <button type="submit">➕ Log Trip</button>
+    <button type="submit" style="width:100%;">➕ Log Trip</button>
   </form>
 </div>
 
 <div class="card" style="margin-top: 20px;">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
     <h3>Trip Logs & Freight Invoicing</h3>
     <button onclick="generateMultiInvoice()">🧾 Print Selected Invoices</button>
   </div>
-  <table>
-    <thead>
-      <tr>
-        <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
-        <th>Delivery Date</th>
-        <th>Issue Date</th>
-        <th>Bill To</th>
-        <th>Client & Route</th>
-        <th>Plate</th>
-        <th>Total (AED)</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="tripsBody"></tbody>
-  </table>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="selectAll" onclick="toggleSelectAll()"></th>
+          <th>Delivery Date</th>
+          <th>Issue Date</th>
+          <th>Bill To</th>
+          <th>Client & Route</th>
+          <th>Plate</th>
+          <th>Logged By</th>
+          <th>Total (AED)</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tripsBody"></tbody>
+    </table>
+  </div>
 </div>
 
 <!-- Clean PDF Replica Modal -->
@@ -307,7 +323,7 @@
 
       <div class="stamp-container">
         <div>
-          <strong>LOAD LION TRANSPORT L.L.C</strong><br><br>
+          <strong>LOAD LION TRANSPORT L.L.C</strong><br><br><br>
           Authorized Signature:<br><br>
           ________________________
         </div>
@@ -333,6 +349,58 @@
 
   let localData = { trips: [] };
   let chartInstance = null;
+  let currentUser = localStorage.getItem('vantage_active_user') || null;
+
+  // Local Accounts Management
+  function getAccounts() {
+    return JSON.parse(localStorage.getItem('vantage_accounts')) || ['Admin Laptop', 'Mobile User 1'];
+  }
+
+  function renderAccountDropdown() {
+    const select = document.getElementById('userSelect');
+    const accounts = getAccounts();
+    select.innerHTML = accounts.map(a => `<option value="${a}">${a}</option>`).join('');
+  }
+
+  function addLocalAccount() {
+    const input = document.getElementById('newAccountName');
+    const name = input.value.trim();
+    if (!name) return alert('Enter a profile name');
+    
+    const accounts = getAccounts();
+    if (!accounts.includes(name)) {
+      accounts.push(name);
+      localStorage.setItem('vantage_accounts', JSON.stringify(accounts));
+      renderAccountDropdown();
+      input.value = '';
+      alert(`Account "${name}" created!`);
+    }
+  }
+
+  function loginUser() {
+    const name = document.getElementById('userSelect').value;
+    if (!name) return alert('Select an account');
+    currentUser = name;
+    localStorage.setItem('vantage_active_user', currentUser);
+    document.getElementById('loginModal').classList.remove('active');
+    document.getElementById('activeUserDisplay').innerText = `👤 ${currentUser}`;
+  }
+
+  function logoutUser() {
+    localStorage.removeItem('vantage_active_user');
+    currentUser = null;
+    document.getElementById('loginModal').classList.add('active');
+  }
+
+  function checkLoginState() {
+    renderAccountDropdown();
+    if (currentUser) {
+      document.getElementById('loginModal').classList.remove('active');
+      document.getElementById('activeUserDisplay').innerText = `👤 ${currentUser}`;
+    } else {
+      document.getElementById('loginModal').classList.add('active');
+    }
+  }
 
   function setToday() { 
     const dateInput = document.getElementById('t-date');
@@ -356,11 +424,11 @@
 
   async function addTrip(e) {
     e.preventDefault();
-    
+    if (!currentUser) return alert("Please log in first!");
+
     const loader = document.getElementById('loadingBar');
     const submitBtn = e.target.querySelector('button[type="submit"]');
     
-    // Show loader and disable button
     if (loader) loader.style.display = 'block';
     if (submitBtn) {
       submitBtn.disabled = true;
@@ -383,7 +451,8 @@
       freight: parseFloat(document.getElementById('t-freight').value) || 0,
       tollname: document.getElementById('t-tollname').value,
       tollcost: parseFloat(document.getElementById('t-tollcost').value) || 0,
-      receipt: document.getElementById('t-receipt').value
+      receipt: document.getElementById('t-receipt').value,
+      createdBy: currentUser
     };
 
     try {
@@ -393,7 +462,6 @@
     } catch (err) {
       alert("Error adding trip: " + err.message);
     } finally {
-      // Hide loader and re-enable button
       if (loader) loader.style.display = 'none';
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -419,14 +487,16 @@
           <td><strong>${t.billto}</strong></td>
           <td>${t.client} <br><small style="color:var(--text-muted);">${t.origin} ➔ ${t.dest}</small></td>
           <td>${t.plate}</td>
+          <td><small>👤 ${t.createdBy || 'System'}</small></td>
           <td><strong>${total} AED</strong></td>
           <td>
-            <button class="outline" onclick="toggleEditAccordion('${t.id}')">✏️ Edit</button>
-            <button class="danger" onclick="deleteTrip('${t.id}')">🗑️</button>
+            <button class="outline" onclick="showTripDetails('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Details</button>
+            <button class="outline" onclick="toggleEditAccordion('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">✏️ Edit</button>
+            <button class="danger" onclick="deleteTrip('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">🗑️</button>
           </td>
         </tr>
         <tr class="edit-row-panel" id="edit-panel-${t.id}">
-          <td colspan="8">
+          <td colspan="9">
             <div class="edit-grid">
               <div><label>Invoice No.</label><input type="text" id="e-invNo-${t.id}" value="${t.invNo || ''}"></div>
               <div><label>Delivery Date</label><input type="date" id="e-date-${t.id}" value="${t.date}"></div>
@@ -452,6 +522,34 @@
         </tr>
       `;
     });
+  }
+
+  function showTripDetails(id) {
+    const t = localData.trips.find(item => item.id === id);
+    if (!t) return;
+    
+    const content = document.getElementById('detailsContent');
+    content.innerHTML = `
+      <div><strong>Invoice #:</strong> ${t.invNo || 'N/A'}</div>
+      <div><strong>Logged By:</strong> ${t.createdBy || 'System'}</div>
+      <div><strong>Delivery Date:</strong> ${t.date}</div>
+      <div><strong>Issue Date:</strong> ${t.issueDate || t.date}</div>
+      <div><strong>Bill To:</strong> ${t.billto}</div>
+      <div><strong>Partner TRN:</strong> ${t.trn || 'N/A'}</div>
+      <div style="grid-column:1/-1;"><strong>Partner Address:</strong> ${t.address || 'N/A'}</div>
+      <div><strong>Client:</strong> ${t.client}</div>
+      <div><strong>DN #:</strong> ${t.dn || 'N/A'}</div>
+      <div><strong>Vehicle Plate:</strong> ${t.plate}</div>
+      <div><strong>Route:</strong> ${t.origin} ➔ ${t.dest}</div>
+      <div><strong>Freight Cost:</strong> ${t.freight} AED</div>
+      <div><strong>Toll Tax:</strong> ${t.tollcost || 0} AED (${t.tollname || 'N/A'})</div>
+      <div style="grid-column:1/-1;"><strong>Toll Receipt #:</strong> ${t.receipt || 'N/A'}</div>
+    `;
+    document.getElementById('detailsModal').classList.add('active');
+  }
+
+  function closeDetailsModal() {
+    document.getElementById('detailsModal').classList.remove('active');
   }
 
   function toggleEditAccordion(id) {
@@ -517,7 +615,7 @@
     document.getElementById('inv-trn').innerText = baseTrip.trn || 'N/A';
     document.getElementById('inv-address').innerText = baseTrip.address || '';
     document.getElementById('inv-client').innerText = baseTrip.client;
-    
+
     const plates = [...new Set(selectedTrips.map(t => t.plate))].join(', ');
     const dns = [...new Set(selectedTrips.map(t => t.dn).filter(Boolean))].join(', ');
     const delivDates = [...new Set(selectedTrips.map(t => t.date.split('-').reverse().join('/')))].join(', ');
@@ -606,15 +704,9 @@
     container.style.display = container.style.display === 'none' ? 'block' : 'none';
   }
 
-  function exportData() {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(localData));
-    const dl = document.createElement('a');
-    dl.setAttribute("href", dataStr); dl.setAttribute("download", "vantage_backup.json");
-    dl.click();
-  }
-
-  // Ensure DOM is ready before manipulating elements
+  // Initializing logic
   document.addEventListener('DOMContentLoaded', () => {
+    checkLoginState();
     setToday();
   });
 </script>
