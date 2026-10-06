@@ -76,10 +76,8 @@
       100% { left: 100%; width: 30%; }
     }
     
-    /* App Workspace Container */
     #appContent { display: none; }
 
-    /* Header Layout */
     header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; gap: 10px; }
     .brand { font-size: 1.4rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; gap: 8px; }
     .nav-links { display: flex; gap: 8px; }
@@ -87,7 +85,6 @@
     .nav-links a.active { background: var(--accent-light); color: var(--accent); }
     .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     
-    /* Dark Grey User Badge */
     .user-badge {
       background: #E2E8F0;
       padding: 6px 14px;
@@ -99,51 +96,24 @@
       align-items: center;
       gap: 6px;
     }
-    .user-badge svg {
-      width: 14px;
-      height: 14px;
-      fill: #475569;
-    }
+    .user-badge svg { width: 14px; height: 14px; fill: #475569; }
 
-    /* Mascot Animation */
     .mascot { width: 38px; height: 38px; animation: float 4s ease-in-out infinite; }
     .mascot-lg { width: 52px; height: 52px; animation: float 4s ease-in-out infinite; }
     @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-4px) rotate(4deg); } 100% { transform: translateY(0px) rotate(0deg); } }
 
-    /* Cards & Layout */
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; }
     .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.05); }
     .card h3 { font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
     .card .val { font-size: 1.7rem; font-weight: bold; color: var(--text); margin-top: 4px; }
     
-    /* Loading Bar CSS */
-    .progress-bar-container {
-      display: none;
-      width: 100%;
-      height: 6px;
-      background-color: var(--accent-light);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 10px;
-      margin-bottom: 15px;
-    }
-    .progress-bar-fill {
-      width: 100%;
-      height: 100%;
-      background-color: var(--accent);
-      animation: loadingAnimation 1.2s infinite linear;
-      transform-origin: 0% 50%;
-    }
-    @keyframes loadingAnimation {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
+    .progress-bar-container { display: none; width: 100%; height: 6px; background-color: var(--accent-light); border-radius: 10px; overflow: hidden; margin-top: 10px; margin-bottom: 15px; }
+    .progress-bar-fill { width: 100%; height: 100%; background-color: var(--accent); animation: loadingAnimation 1.2s infinite linear; transform-origin: 0% 50%; }
+    @keyframes loadingAnimation { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
 
-    /* Charts */
     .chart-container { position: relative; height: 200px; width: 100%; }
     .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     
-    /* Buttons & Forms */
     button { background: var(--accent); color: white; border: none; padding: 12px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.95rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; touch-action: manipulation; }
     button.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
     button.danger { background: var(--danger); }
@@ -151,58 +121,67 @@
     .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 12px; }
     label { font-size: 0.8rem; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 4px; }
 
-    /* Tables */
     .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table { width: 100%; border-collapse: collapse; background: var(--card-bg); font-size: 0.88rem; white-space: nowrap; }
     th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
     th { background: var(--accent-light); color: var(--accent); }
     .row-select { width: 22px; height: 22px; cursor: pointer; }
 
-    /* Edit Panel */
     .edit-row-panel { display: none; background: #F1F5F9; border-bottom: 2px solid var(--accent); }
     .edit-row-panel.active { display: table-row; }
     .edit-grid { padding: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 6px; margin: 10px; white-space: normal; }
 
-    /* Modals */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; padding: 15px; overflow-y: auto; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; justify-content: center; align-items: center; padding: 10px; overflow-y: auto; }
     .modal.active { display: flex; }
     .modal-card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     
-    /* Exact Document Replica Layout */
+    /* Narrower, Portrait-style Invoice Replica */
     .invoice-wrapper { 
       background: #FFFFFF !important; 
-      padding: 30px; 
+      padding: 35px 30px; 
       width: 100%; 
-      max-width: 800px; 
+      max-width: 620px; /* Narrower and cleaner vertical layout */
       font-family: Arial, Helvetica, sans-serif; 
       color: #000000; 
       border: 1px solid #CBD5E1; 
       margin: 0 auto;
       white-space: normal;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      border-radius: 8px;
     }
-    .inv-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
-    .inv-header h1 { font-size: 22px; font-weight: bold; text-transform: uppercase; color: #000; margin-bottom: 4px; }
-    .inv-header p { font-size: 12px; color: #333; margin: 2px 0; }
-    .inv-sub { text-align: center; font-size: 18px; font-weight: bold; margin: 10px 0 15px 0; letter-spacing: 2px; text-transform: uppercase; text-decoration: underline; }
-    .inv-meta { display: flex; justify-content: space-between; font-weight: bold; font-size: 13px; border-bottom: 1px solid #000; padding-bottom: 8px; margin-bottom: 15px; }
-    .inv-section { border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 15px; font-size: 13px; line-height: 1.5; }
-    .inv-section h4 { text-transform: uppercase; margin-bottom: 4px; text-decoration: underline; }
-    .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13px; }
-    .inv-table th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 8px; text-align: left; background: transparent !important; color: #000 !important; font-weight: bold; }
-    .inv-table td { padding: 8px; border-bottom: 1px solid #E2E8F0; }
-    .inv-totals { text-align: right; font-size: 14px; margin-top: 15px; }
-    .inv-totals .grand-total { font-weight: bold; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 0; font-size: 16px; margin-top: 8px; }
-    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; }
-    .modal-actions { display: flex; gap: 10px; margin-bottom: 15px; justify-content: flex-end; }
+    .inv-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 15px; }
+    .inv-header h1 { font-size: 20px; font-weight: bold; text-transform: uppercase; color: #000; margin-bottom: 4px; }
+    .inv-header p { font-size: 11px; color: #333; margin: 2px 0; }
+    .inv-sub { text-align: center; font-size: 16px; font-weight: bold; margin: 10px 0 15px 0; letter-spacing: 2px; text-transform: uppercase; text-decoration: underline; }
+    .inv-meta { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; border-bottom: 1px solid #000; padding-bottom: 8px; margin-bottom: 15px; }
+    .inv-section { border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 15px; font-size: 12px; line-height: 1.5; }
+    .inv-section h4 { text-transform: uppercase; margin-bottom: 4px; text-decoration: underline; font-size: 11px; color: #333; }
+    .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
+    .inv-table th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 8px 6px; text-align: left; background: transparent !important; color: #000 !important; font-weight: bold; }
+    .inv-table td { padding: 8px 6px; border-bottom: 1px solid #E2E8F0; }
+    .inv-totals { text-align: right; font-size: 13px; margin-top: 15px; }
+    .inv-totals .grand-total { font-weight: bold; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 0; font-size: 15px; margin-top: 8px; }
+    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; font-size: 12px; }
+    
+    /* Modal Action Bar inside the container */
+    .invoice-actions-bar {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-bottom: 15px;
+      max-width: 620px;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
     /* Print Specific Media Rules */
     @media print {
       body * { visibility: hidden !important; background: transparent !important; box-shadow: none !important; }
       #invoiceModal, #invoiceModal * { visibility: visible !important; }
       #invoiceModal { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; padding: 0 !important; background: #ffffff !important; display: block !important; }
-      .invoice-wrapper { border: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; color: #000000 !important; margin: 0 !important; }
-      .modal-actions { display: none !important; }
-      @page { margin: 12mm; size: auto; }
+      .invoice-wrapper { border: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; color: #000000 !important; margin: 0 !important; border-radius: 0 !important; }
+      .invoice-actions-bar { display: none !important; }
+      @page { margin: 10mm; size: auto; }
     }
     
     @media (max-width: 600px) {
@@ -303,7 +282,6 @@
       <a href="utilities.html">Expenses & Maintenance</a>
     </div>
     <div class="header-actions">
-      <!-- User badge with SVG Dark Grey Figure -->
       <span class="user-badge" id="activeUserDisplay">
         <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
         <span id="userNameText">Guest</span>
@@ -392,10 +370,12 @@
 
   <!-- PDF Invoice Modal -->
   <div class="modal" id="invoiceModal">
-    <div style="width: 100%; max-width: 850px;">
-      <div class="modal-actions">
-        <button class="outline" onclick="closeInvoice()" style="background:white;">Close</button>
-        <button onclick="printInvoice()">Print PDF Invoice</button>
+    <div style="width: 100%; max-width: 650px; padding: 10px;">
+      
+      <!-- Action buttons clearly visible above/attached to invoice container -->
+      <div class="invoice-actions-bar">
+        <button class="outline" onclick="closeInvoice()" style="background:white; padding: 8px 14px; min-height: 38px;">Close</button>
+        <button onclick="printInvoice()" style="padding: 8px 14px; min-height: 38px;">Print PDF Invoice</button>
       </div>
       
       <div class="invoice-wrapper" id="printableInvoice">
@@ -458,7 +438,6 @@
 </main>
 
 <script>
-  // Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyDfYzDRXRd8DD7bPPznLqEsjn6shn1Obvc",
     authDomain: "vantage-erp.firebaseapp.com",
@@ -884,7 +863,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    checkLoginState(2500); // 2.5 second delay
+    checkLoginState(2500);
     setToday();
   });
 </script>
