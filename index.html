@@ -8,6 +8,15 @@
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script>
+    // Force page to jump back to the top on refresh
+    if ('scrollRestoration' in history) {
+      history.scrollRestoration = 'manual';
+    }
+    window.addEventListener('beforeunload', () => {
+      window.scrollTo(0, 0);
+    });
+  </script>
   <style>
     :root {
       --bg: #F8FAFC;
@@ -135,12 +144,12 @@
     .modal.active { display: flex; }
     .modal-card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     
-    /* Narrower, Portrait-style Invoice Replica */
+    /* Clean Portrait Invoice Replica */
     .invoice-wrapper { 
       background: #FFFFFF !important; 
       padding: 35px 30px; 
       width: 100%; 
-      max-width: 620px; /* Narrower and cleaner vertical layout */
+      max-width: 620px; 
       font-family: Arial, Helvetica, sans-serif; 
       color: #000000; 
       border: 1px solid #CBD5E1; 
@@ -150,25 +159,24 @@
       border-radius: 8px;
     }
     .inv-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 15px; }
-    .inv-header h1 { font-size: 20px; font-weight: bold; text-transform: uppercase; color: #000; margin-bottom: 4px; }
-    .inv-header p { font-size: 11px; color: #333; margin: 2px 0; }
-    .inv-sub { text-align: center; font-size: 16px; font-weight: bold; margin: 10px 0 15px 0; letter-spacing: 2px; text-transform: uppercase; text-decoration: underline; }
-    .inv-meta { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; border-bottom: 1px solid #000; padding-bottom: 8px; margin-bottom: 15px; }
-    .inv-section { border-bottom: 1px solid #000; padding-bottom: 10px; margin-bottom: 15px; font-size: 12px; line-height: 1.5; }
-    .inv-section h4 { text-transform: uppercase; margin-bottom: 4px; text-decoration: underline; font-size: 11px; color: #333; }
+    .inv-header h1 { font-size: 20px; font-weight: bold; text-transform: uppercase; color: #000; margin-bottom: 4px; letter-spacing: 1px; }
+    .inv-sub { text-align: center; font-size: 18px; font-weight: bold; margin: 10px 0 15px 0; letter-spacing: 3px; text-transform: uppercase; border-bottom: 1px dashed #000; padding-bottom: 8px; }
+    .inv-meta { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 15px; }
+    .inv-section { border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 15px; font-size: 12px; line-height: 1.5; }
+    .inv-section h4 { text-transform: uppercase; margin-bottom: 4px; font-weight: bold; font-size: 11px; color: #000; }
     .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
-    .inv-table th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 8px 6px; text-align: left; background: transparent !important; color: #000 !important; font-weight: bold; }
+    .inv-table th { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 8px 6px; text-align: left; background: transparent !important; color: #000 !important; font-weight: bold; }
     .inv-table td { padding: 8px 6px; border-bottom: 1px solid #E2E8F0; }
     .inv-totals { text-align: right; font-size: 13px; margin-top: 15px; }
     .inv-totals .grand-total { font-weight: bold; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 0; font-size: 15px; margin-top: 8px; }
     .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; font-size: 12px; }
     
-    /* Modal Action Bar inside the container */
+    /* Action Bar locked nicely above invoice container */
     .invoice-actions-bar {
       display: flex;
       gap: 10px;
       justify-content: flex-end;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       max-width: 620px;
       margin-left: auto;
       margin-right: auto;
@@ -179,7 +187,7 @@
       body * { visibility: hidden !important; background: transparent !important; box-shadow: none !important; }
       #invoiceModal, #invoiceModal * { visibility: visible !important; }
       #invoiceModal { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; height: auto !important; padding: 0 !important; background: #ffffff !important; display: block !important; }
-      .invoice-wrapper { border: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; color: #000000 !important; margin: 0 !important; border-radius: 0 !important; }
+      .invoice-wrapper { border: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; color: #000000 !important; margin: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
       .invoice-actions-bar { display: none !important; }
       @page { margin: 10mm; size: auto; }
     }
@@ -372,19 +380,14 @@
   <div class="modal" id="invoiceModal">
     <div style="width: 100%; max-width: 650px; padding: 10px;">
       
-      <!-- Action buttons clearly visible above/attached to invoice container -->
+      <!-- Action buttons clearly visible and always accessible -->
       <div class="invoice-actions-bar">
-        <button class="outline" onclick="closeInvoice()" style="background:white; padding: 8px 14px; min-height: 38px;">Close</button>
-        <button onclick="printInvoice()" style="padding: 8px 14px; min-height: 38px;">Print PDF Invoice</button>
+        <button class="outline" onclick="closeInvoice()" style="background:white; padding: 8px 16px; min-height: 38px;">Close</button>
+        <button onclick="printInvoice()" style="padding: 8px 16px; min-height: 38px;">Print PDF Invoice</button>
       </div>
       
       <div class="invoice-wrapper" id="printableInvoice">
-        <div class="inv-header">
-          <h1>LOAD LION TRANSPORT L.L.C</h1>
-          <p>Heavy Freight & Logistics Solutions | United Arab Emirates</p>
-        </div>
-
-        <div class="inv-sub">TAX INVOICE</div>
+        <div class="inv-sub">INVOICE</div>
         
         <div class="inv-meta">
           <div>INVOICE NO: <span id="inv-no">INV-2026-0001</span></div>
@@ -426,9 +429,8 @@
 
         <div class="stamp-container">
           <div>
-            <strong>LOAD LION TRANSPORT L.L.C</strong><br><br><br>
-            Authorized Signature:<br><br>
-            ________________________
+            <strong>LOAD LION TRANSPORT L.L.C</strong><br><br>
+            Signature & Company Stamp:
           </div>
         </div>
       </div>
