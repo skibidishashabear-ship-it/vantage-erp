@@ -1,0 +1,278 @@
+<!-- Load Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // 1. Paste your Firebase credentials here:
+  const firebaseConfig = {
+    apiKey: "AIzaSyDfYzDRXRd8DD7bPPznLqEsjn6shn1Obvc",
+    authDomain: "vantage-erp.firebaseapp.com",
+    projectId: "vantage-erp",
+    storageBucket: "vantage-erp.firebasestorage.app",
+    messagingSenderId: "291156677597",
+    appId: "1:291156677597:web:5680c5db276e7e3d9b5c34"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  let localData = { trips: [] };
+  let chartInstance = null;
+
+  function setToday() { 
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('t-date').value = today;
+    document.getElementById('t-issuedate').value = today;
+  }
+
+  // 2. Real-time Cloud Sync Listener
+  db.collection("trips").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+    localData.trips = [];
+    snapshot.forEach((doc) => {
+      localData.trips.push({ id: doc.id, ...doc.data() });
+    });
+    renderTrips();
+    updateDashboard();
+  }, (error) => {
+    console.error("Error fetching trips: ", error);
+  });
+
+  // 3. Add Trip to Cloud Database
+  async function addTrip(e) {
+    e.preventDefault();
+    const trip = {
+      timestamp: Date.now(),
+      invNo: `INV-2026-${String((localData.trips.length + 1)).padStart(4, '0')}`,
+      date: document.getElementById('t-date').value,
+      issueDate: document.getElementById('t-issuedate').value,
+      billto: document.getElementById('t-billto').value,
+      trn: document.getElementById('t-trn').value,
+      address: document.getElementById('t-address').value,
+      client: document.getElementById('t-client').value,
+      dn: document.getElementById('t-dn').value,
+      plate: document.getElementById('t-plate').value,
+      origin: document.getElementById('t-origin').value,
+      dest: document.getElementById('t-dest').value,
+      freight: parseFloat(document.getElementById('t-freight').value) || 0,
+      tollname: document.getElementById('t-tollname').value,
+      tollcost: parseFloat(document.getElementById('t-tollcost').value) || 0,
+      receipt: document.getElementById('t-receipt').value
+    };
+
+    try {
+      await db.collection("trips").add(trip);
+      e.target.reset();
+      setToday();
+    } catch (err) {
+      alert("Error adding trip to database: " + err.message);
+    }
+  }
+
+  function renderTrips() {
+    const tbody = document.getElementById('tripsBody');
+    tbody.innerHTML = '';
+    localData.trips.forEach(t => {
+      const total = (t.freight + t.tollcost).toFixed(2);
+      const formattedDelivDate = t.date ? t.date.split('-').reverse().join('/') : 'N/A';
+      const formattedIssueDate = t.issueDate ? t.issueDate.split('-').reverse().join('/') : formattedDelivDate;
+      
+      tbody.innerHTML += `
+        <tr>
+          <td><input type="checkbox" class="row-select" value="${t.id}"></td>
+          <td>${formattedDelivDate}</td>
+          <td>${formattedIssueDate}</td>
+          <td><strong>${t.billto}</strong></td>
+          <td>${t.client} <br><small style="color:var(--text-muted);">${t.origin} ➔ ${t.dest}</small></td>
+          <td>${t.plate}</td>
+          <td><strong>${total} AED</strong></td>
+          <td>
+            <button class="outline" onclick="toggleEditAccordion('${t.id}')">✏️ Edit</button>
+            <button class="danger" onclick="deleteTrip('${t.id}')">🗑️</button>
+          </td>
+        </tr>
+        <tr class="edit-row-panel" id="edit-panel-${t.id}">
+          <td colspan="8">
+            <div class="edit-grid">
+              <div><label>Invoice No.</label><input type="text" id="e-invNo-${t.id}" value="${t.invNo || ''}"></div>
+              <div><label>Delivery Date</label><input type="date" id="e-date-${t.id}" value="${t.date}"></div>
+              <div><label>Issue Date</label><input type="date" id="e-issuedate-${t.id}" value="${t.issueDate || t.date}"></div>
+              <div><label>Bill To</label><input type="text" id="e-billto-${t.id}" value="${t.billto}"></div>
+              <div><label>Partner TRN</label><input type="text" id="e-trn-${t.id}" value="${t.trn || ''}"></div>
+              <div><label>Partner Address</label><input type="text" id="e-address-${t.id}" value="${t.address || ''}"></div>
+              <div><label>End Client</label><input type="text" id="e-client-${t.id}" value="${t.client}"></div>
+              <div><label>Delivery Note #</label><input type="text" id="e-dn-${t.id}" value="${t.dn || ''}"></div>
+              <div><label>Plate No.</label><input type="text" id="e-plate-${t.id}" value="${t.plate}"></div>
+              <div><label>Origin</label><input type="text" id="e-origin-${t.id}" value="${t.origin}"></div>
+              <div><label>Destination</label><input type="text" id="e-dest-${t.id}" value="${t.dest}"></div>
+              <div><label>Freight Cost (AED)</label><input type="number" step="any" id="e-freight-${t.id}" value="${t.freight}"></div>
+              <div><label>Toll Name</label><input type="text" id="e-tollname-${t.id}" value="${t.tollname || ''}"></div>
+              <div><label>Toll Cost (AED)</label><input type="number" step="any" id="e-tollcost-${t.id}" value="${t.tollcost || 0}"></div>
+              <div><label>Toll Receipt #</label><input type="text" id="e-receipt-${t.id}" value="${t.receipt || ''}"></div>
+              <div style="grid-column: 1 / -1; display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
+                <button class="outline" onclick="toggleEditAccordion('${t.id}')">Cancel</button>
+                <button onclick="saveAccordionEdit('${t.id}')">Save Changes</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  function toggleEditAccordion(id) {
+    document.getElementById(`edit-panel-${id}`).classList.toggle('active');
+  }
+
+  // 4. Update Trip in Cloud
+  async function saveAccordionEdit(id) {
+    const updatedTrip = {
+      invNo: document.getElementById(`e-invNo-${id}`).value,
+      date: document.getElementById(`e-date-${id}`).value,
+      issueDate: document.getElementById(`e-issuedate-${id}`).value,
+      billto: document.getElementById(`e-billto-${id}`).value,
+      trn: document.getElementById(`e-trn-${id}`).value,
+      address: document.getElementById(`e-address-${id}`).value,
+      client: document.getElementById(`e-client-${id}`).value,
+      dn: document.getElementById(`e-dn-${id}`).value,
+      plate: document.getElementById(`e-plate-${id}`).value,
+      origin: document.getElementById(`e-origin-${id}`).value,
+      dest: document.getElementById(`e-dest-${id}`).value,
+      freight: parseFloat(document.getElementById(`e-freight-${id}`).value) || 0,
+      tollname: document.getElementById(`e-tollname-${id}`).value,
+      tollcost: parseFloat(document.getElementById(`e-tollcost-${id}`).value) || 0,
+      receipt: document.getElementById(`e-receipt-${id}`).value
+    };
+
+    try {
+      await db.collection("trips").doc(id).update(updatedTrip);
+    } catch (err) {
+      alert("Error updating record: " + err.message);
+    }
+  }
+
+  // 5. Delete Trip from Cloud
+  async function deleteTrip(id) {
+    if (confirm('Delete this trip record?')) {
+      try {
+        await db.collection("trips").doc(id).delete();
+      } catch (err) {
+        alert("Error deleting record: " + err.message);
+      }
+    }
+  }
+
+  function toggleSelectAll() {
+    const state = document.getElementById('selectAll').checked;
+    document.querySelectorAll('.row-select').forEach(cb => cb.checked = state);
+  }
+
+  function generateMultiInvoice() {
+    const selectedIds = Array.from(document.querySelectorAll('.row-select:checked')).map(cb => cb.value);
+    if (selectedIds.length === 0) return alert('Select at least one trip to generate an invoice.');
+    
+    const selectedTrips = localData.trips.filter(t => selectedIds.includes(t.id));
+    const baseTrip = selectedTrips[0];
+
+    document.getElementById('inv-no').innerText = baseTrip.invNo || 'INV-2026-0001';
+    
+    const issueDateStr = baseTrip.issueDate 
+      ? baseTrip.issueDate.split('-').reverse().join('/') 
+      : new Date().toLocaleDateString('en-GB');
+    document.getElementById('inv-date').innerText = issueDateStr;
+
+    document.getElementById('inv-billto').innerText = baseTrip.billto;
+    document.getElementById('inv-trn').innerText = baseTrip.trn || 'N/A';
+    document.getElementById('inv-address').innerText = baseTrip.address || '';
+    document.getElementById('inv-client').innerText = baseTrip.client;
+    
+    const plates = [...new Set(selectedTrips.map(t => t.plate))].join(', ');
+    const dns = [...new Set(selectedTrips.map(t => t.dn).filter(Boolean))].join(', ');
+    const delivDates = [...new Set(selectedTrips.map(t => t.date.split('-').reverse().join('/')))].join(', ');
+    const routes = selectedTrips.map(t => `Origin (${t.origin}) to Destination (${t.dest})`).join('; ');
+    
+    document.getElementById('inv-plate-display').innerText = plates;
+    document.getElementById('inv-dn-display').innerText = dns || 'N/A';
+    document.getElementById('inv-deliv-date').innerText = delivDates;
+    document.getElementById('inv-route-display').innerText = routes;
+
+    const tbody = document.getElementById('inv-items');
+    tbody.innerHTML = '';
+    let subtotal = 0;
+
+    selectedTrips.forEach(t => {
+      tbody.innerHTML += `
+        <tr>
+          <td>Freight / Transportation Services</td>
+          <td style="text-align:center;">1</td>
+          <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
+          <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
+        </tr>
+      `;
+      subtotal += t.freight;
+      
+      if (t.tollcost > 0) {
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              Toll Tax: ${t.tollname || 'Salik'}<br>
+              <span style="font-size:11px; color:#555;">Receipt No: ${t.receipt || 'N/A'}</span>
+            </td>
+            <td style="text-align:center;">1</td>
+            <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+            <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+          </tr>
+        `;
+        subtotal += t.tollcost;
+      }
+    });
+
+    document.getElementById('inv-subtotal').innerText = subtotal.toFixed(2);
+    document.getElementById('inv-total').innerText = subtotal.toFixed(2);
+    
+    document.getElementById('invoiceModal').classList.add('active');
+  }
+
+  function closeInvoice() { document.getElementById('invoiceModal').classList.remove('active'); }
+
+  function updateDashboard() {
+    const totalRev = localData.trips.reduce((acc, t) => acc + t.freight + t.tollcost, 0);
+    document.getElementById('total-revenue').innerText = totalRev.toFixed(2) + ' AED';
+    document.getElementById('total-trips').innerText = localData.trips.length;
+    
+    const monthlyData = {};
+    localData.trips.forEach(t => {
+      const month = t.date ? t.date.substring(0, 7) : 'Unknown';
+      monthlyData[month] = (monthlyData[month] || 0) + t.freight + t.tollcost;
+    });
+
+    if (chartInstance) chartInstance.destroy();
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: Object.keys(monthlyData).length ? Object.keys(monthlyData) : ['No Data'],
+        datasets: [{
+          label: 'Revenue (AED)',
+          data: Object.keys(monthlyData).length ? Object.values(monthlyData) : [0],
+          borderColor: '#10B981', backgroundColor: '#ECFDF5', fill: true, tension: 0.3
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  function toggleChart(id) {
+    const container = document.getElementById(id + '-container');
+    container.style.display = container.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function exportData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(localData));
+    const dl = document.createElement('a');
+    dl.setAttribute("href", dataStr); dl.setAttribute("download", "vantage_backup.json");
+    dl.click();
+  }
+
+  setToday();
+</script>
