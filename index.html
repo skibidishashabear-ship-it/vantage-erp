@@ -510,7 +510,7 @@
     }
   }
 
-  function checkLoginState(delayMs = 2500) {
+  function checkLoginState(delayMs = 1500) {
     renderAccountDropdown();
     const appContent = document.getElementById('appContent');
     const loginModal = document.getElementById('loginModal');
@@ -864,7 +864,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    checkLoginState(2500);
+    checkLoginState(1500);
     setToday();
   });
 </script>
