@@ -22,6 +22,53 @@
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding: 15px; -webkit-tap-highlight-color: transparent; }
+
+    /* Initial App Loading Screen (Prevents Login Flash) */
+    #initialLoader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: var(--bg);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+    }
+    .loader-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .loader-spinner {
+      width: 140px;
+      height: 4px;
+      background-color: var(--accent-light);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .loader-spinner::after {
+      content: '';
+      position: absolute;
+      left: -50%;
+      height: 100%;
+      width: 50%;
+      background-color: var(--accent);
+      border-radius: 4px;
+      animation: loadingBar 1s infinite ease-in-out;
+    }
+    @keyframes loadingBar {
+      0% { left: -50%; width: 30%; }
+      50% { width: 60%; }
+      100% { left: 100%; width: 30%; }
+    }
     
     /* App Workspace Container (Hidden until authenticated) */
     #appContent { display: none; }
@@ -37,6 +84,7 @@
 
     /* Mascot Animation */
     .mascot { width: 38px; height: 38px; animation: float 4s ease-in-out infinite; }
+    .mascot-lg { width: 52px; height: 52px; animation: float 4s ease-in-out infinite; }
     @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-4px) rotate(4deg); } 100% { transform: translateY(0px) rotate(0deg); } }
 
     /* Cards & Layout */
@@ -141,8 +189,24 @@
 </head>
 <body>
 
-<!-- Login Modal (No Emojis) -->
-<div class="modal active" id="loginModal">
+<!-- Startup Loading Overlay (Prevents FOUC/Login Flash) -->
+<div id="initialLoader">
+  <div class="loader-brand">
+    <svg class="mascot-lg" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="40" fill="#10B981" />
+      <circle cx="50" cy="50" r="30" fill="#ECFDF5" />
+      <path d="M35 45 Q50 65 65 45" stroke="#10B981" stroke-width="4" fill="none" />
+      <circle cx="40" cy="40" r="4" fill="#0F172A" />
+      <circle cx="60" cy="40" r="4" fill="#0F172A" />
+    </svg>
+    <span>Vantage ERP</span>
+  </div>
+  <div class="loader-spinner"></div>
+  <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">Loading workspace...</p>
+</div>
+
+<!-- Login Modal (Hidden by Default) -->
+<div class="modal" id="loginModal">
   <div class="modal-card">
     <h2 style="color:var(--accent); text-align:center; margin-bottom:10px;">Vantage ERP Access</h2>
     <p style="color:var(--text-muted); font-size:0.88rem; text-align:center; margin-bottom:20px;">Select your account and enter password to log in.</p>
@@ -167,7 +231,7 @@
   <!-- Admin User Management Modal -->
   <div class="modal" id="adminUserModal">
     <div class="modal-card">
-      <h3 style="color:var(--accent); margin-bottom:15px;">⚙️️ Admin User Management</h3>
+      <h3 style="color:var(--accent); margin-bottom:15px;">Admin User Management</h3>
       <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Create or modify user accounts across the system.</p>
       
       <div style="margin-bottom:10px;">
@@ -189,7 +253,7 @@
   <!-- Details Modal -->
   <div class="modal" id="detailsModal">
     <div class="modal-card" style="max-width: 550px;">
-      <h3 style="color:var(--accent); margin-bottom:15px;">📋 Freight Trip Details</h3>
+      <h3 style="color:var(--accent); margin-bottom:15px;">Freight Trip Details</h3>
       <div id="detailsContent" style="font-size:0.9rem; line-height:1.6; display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
       <div style="margin-top:20px; text-align:right;">
         <button class="outline" onclick="closeDetailsModal()">Close</button>
@@ -213,8 +277,8 @@
       <a href="utilities.html">Expenses & Maintenance</a>
     </div>
     <div class="header-actions">
-      <span class="user-badge" id="activeUserDisplay">👤 Guest</span>
-      <button class="outline" id="adminManageBtn" onclick="openAdminUserModal()" style="display:none; padding:6px 12px; min-height:36px; font-size:0.8rem;">⚙️ Manage Users</button>
+      <span class="user-badge" id="activeUserDisplay">User: Guest</span>
+      <button class="outline" id="adminManageBtn" onclick="openAdminUserModal()" style="display:none; padding:6px 12px; min-height:36px; font-size:0.8rem;">Manage Users</button>
       <button class="outline" onclick="logoutUser()" style="padding:6px 12px; min-height:36px; font-size:0.8rem;">Logout</button>
     </div>
   </header>
@@ -223,7 +287,7 @@
     <div class="card">
       <div class="chart-header">
         <h3>Revenue Analytics</h3>
-        <button class="outline" onclick="toggleChart('revenueChart')" style="padding:4px 8px; min-height:32px; font-size:0.8rem;">👁️ Toggle</button>
+        <button class="outline" onclick="toggleChart('revenueChart')" style="padding:4px 8px; min-height:32px; font-size:0.8rem;">Toggle View</button>
       </div>
       <div class="chart-container" id="revenueChart-container">
         <canvas id="revenueChart"></canvas>
@@ -267,14 +331,14 @@
         <div><label>Toll Cost (AED)</label><input type="number" id="t-tollcost" step="any" value="0"></div>
         <div><label>Toll Receipt #</label><input type="text" id="t-receipt" placeholder="3403041062610873221"></div>
       </div>
-      <button type="submit" style="width:100%;">➕ Log Trip</button>
+      <button type="submit" style="width:100%;">Log Trip</button>
     </form>
   </div>
 
   <div class="card" style="margin-top: 20px;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
       <h3>Trip Logs & Freight Invoicing</h3>
-      <button onclick="generateMultiInvoice()">🧾 Print Selected Invoices</button>
+      <button onclick="generateMultiInvoice()">Print Selected Invoices</button>
     </div>
     <div class="table-responsive">
       <table>
@@ -300,8 +364,8 @@
   <div class="modal" id="invoiceModal">
     <div>
       <div class="modal-actions">
-        <button class="outline" onclick="closeInvoice()" style="background:white;">❌ Close</button>
-        <button onclick="window.print()">🖨 Print PDF Invoice</button>
+        <button class="outline" onclick="closeInvoice()" style="background:white;">Close</button>
+        <button onclick="window.print()">Print PDF Invoice</button>
       </div>
       
       <div class="invoice-wrapper">
@@ -423,10 +487,10 @@
     const adminBtn = document.getElementById('adminManageBtn');
     
     if (currentUser) {
-      activeBadge.innerText = `👤 ${currentUser}`;
+      activeBadge.innerText = `User: ${currentUser}`;
       adminBtn.style.display = (currentUser === 'Administrator') ? 'inline-flex' : 'none';
     } else {
-      activeBadge.innerText = `👤 Guest`;
+      activeBadge.innerText = `User: Guest`;
       adminBtn.style.display = 'none';
     }
   }
@@ -435,6 +499,7 @@
     renderAccountDropdown();
     const appContent = document.getElementById('appContent');
     const loginModal = document.getElementById('loginModal');
+    const loader = document.getElementById('initialLoader');
 
     if (currentUser) {
       loginModal.classList.remove('active');
@@ -443,6 +508,11 @@
     } else {
       loginModal.classList.add('active');
       appContent.style.display = 'none';
+    }
+
+    // Hide loading screen once state is settled
+    if (loader) {
+      loader.style.display = 'none';
     }
   }
 
@@ -501,7 +571,7 @@
     if (loader) loader.style.display = 'block';
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.innerText = '⏳ Saving Log...';
+      submitBtn.innerText = 'Saving Log...';
     }
 
     const trip = {
@@ -534,7 +604,7 @@
       if (loader) loader.style.display = 'none';
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerText = '➕ Log Trip';
+        submitBtn.innerText = 'Log Trip';
       }
     }
   }
@@ -556,12 +626,12 @@
           <td><strong>${t.billto}</strong></td>
           <td>${t.client} <br><small style="color:var(--text-muted);">${t.origin} ➔ ${t.dest}</small></td>
           <td>${t.plate}</td>
-          <td><small>👤 ${t.createdBy || 'System'}</small></td>
+          <td><small>${t.createdBy || 'System'}</small></td>
           <td><strong>${total} AED</strong></td>
           <td>
             <button class="outline" onclick="showTripDetails('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Details</button>
-            <button class="outline" onclick="toggleEditAccordion('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">✏️ Edit</button>
-            <button class="danger" onclick="deleteTrip('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">🗑️</button>
+            <button class="outline" onclick="toggleEditAccordion('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Edit</button>
+            <button class="danger" onclick="deleteTrip('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Delete</button>
           </td>
         </tr>
         <tr class="edit-row-panel" id="edit-panel-${t.id}">
