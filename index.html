@@ -42,6 +42,29 @@
     .card h3 { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; }
     .card .val { font-size: 1.8rem; font-weight: bold; color: var(--text); }
     
+    /* Loading Bar CSS */
+    .progress-bar-container {
+      display: none;
+      width: 100%;
+      height: 6px;
+      background-color: var(--accent-light);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 10px;
+      margin-bottom: 15px;
+    }
+    .progress-bar-fill {
+      width: 100%;
+      height: 100%;
+      background-color: var(--accent);
+      animation: loadingAnimation 1.2s infinite linear;
+      transform-origin: 0% 50%;
+    }
+    @keyframes loadingAnimation {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
     /* Charts */
     .chart-container { position: relative; height: 220px; width: 100%; }
     .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -179,34 +202,11 @@
 
 <div class="card">
   <h3>Log New Freight Trip</h3>
-  <br>
-  <!-- Loading Bar CSS & HTML -->
-<style>
-  .progress-bar-container {
-    display: none;
-    width: 100%;
-    height: 6px;
-    background-color: var(--accent-light);
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 15px;
-  }
-  .progress-bar-fill {
-    width: 100%;
-    height: 100%;
-    background-color: var(--accent);
-    animation: loadingAnimation 1.2s infinite linear;
-    transform-origin: 0% 50%;
-  }
-  @keyframes loadingAnimation {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-</style>
+  
+  <div id="loadingBar" class="progress-bar-container">
+    <div class="progress-bar-fill"></div>
+  </div>
 
-<div id="loadingBar" class="progress-bar-container">
-  <div class="progress-bar-fill"></div>
-</div>
   <form id="tripForm" onsubmit="addTrip(event)">
     <div class="form-row">
       <div><label>Delivery Date</label><input type="date" id="t-date" required></div>
@@ -355,52 +355,53 @@
   });
 
   async function addTrip(e) {
-  e.preventDefault();
-  
-  const loader = document.getElementById('loadingBar');
-  const submitBtn = e.target.querySelector('button[type="submit"]');
-  
-  // Show loader and disable button
-  if (loader) loader.style.display = 'block';
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerText = '⏳ Saving Log...';
-  }
-
-  const trip = {
-    timestamp: Date.now(),
-    invNo: `INV-2026-${String((localData.trips.length + 1)).padStart(4, '0')}`,
-    date: document.getElementById('t-date').value,
-    issueDate: document.getElementById('t-issuedate').value,
-    billto: document.getElementById('t-billto').value,
-    trn: document.getElementById('t-trn').value,
-    address: document.getElementById('t-address').value,
-    client: document.getElementById('t-client').value,
-    dn: document.getElementById('t-dn').value,
-    plate: document.getElementById('t-plate').value,
-    origin: document.getElementById('t-origin').value,
-    dest: document.getElementById('t-dest').value,
-    freight: parseFloat(document.getElementById('t-freight').value) || 0,
-    tollname: document.getElementById('t-tollname').value,
-    tollcost: parseFloat(document.getElementById('t-tollcost').value) || 0,
-    receipt: document.getElementById('t-receipt').value
-  };
-
-  try {
-    await db.collection("trips").add(trip);
-    e.target.reset();
-    setToday();
-  } catch (err) {
-    alert("Error adding trip: " + err.message);
-  } finally {
-    // Hide loader and re-enable button
-    if (loader) loader.style.display = 'none';
+    e.preventDefault();
+    
+    const loader = document.getElementById('loadingBar');
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    
+    // Show loader and disable button
+    if (loader) loader.style.display = 'block';
     if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerText = '➕ Log Trip';
+      submitBtn.disabled = true;
+      submitBtn.innerText = '⏳ Saving Log...';
+    }
+
+    const trip = {
+      timestamp: Date.now(),
+      invNo: `INV-2026-${String((localData.trips.length + 1)).padStart(4, '0')}`,
+      date: document.getElementById('t-date').value,
+      issueDate: document.getElementById('t-issuedate').value,
+      billto: document.getElementById('t-billto').value,
+      trn: document.getElementById('t-trn').value,
+      address: document.getElementById('t-address').value,
+      client: document.getElementById('t-client').value,
+      dn: document.getElementById('t-dn').value,
+      plate: document.getElementById('t-plate').value,
+      origin: document.getElementById('t-origin').value,
+      dest: document.getElementById('t-dest').value,
+      freight: parseFloat(document.getElementById('t-freight').value) || 0,
+      tollname: document.getElementById('t-tollname').value,
+      tollcost: parseFloat(document.getElementById('t-tollcost').value) || 0,
+      receipt: document.getElementById('t-receipt').value
+    };
+
+    try {
+      await db.collection("trips").add(trip);
+      e.target.reset();
+      setToday();
+    } catch (err) {
+      alert("Error adding trip: " + err.message);
+    } finally {
+      // Hide loader and re-enable button
+      if (loader) loader.style.display = 'none';
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerText = '➕ Log Trip';
+      }
     }
   }
-}
+
   function renderTrips() {
     const tbody = document.getElementById('tripsBody');
     if (!tbody) return;
