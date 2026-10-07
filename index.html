@@ -130,7 +130,6 @@
     button.danger { background: var(--danger); }
     input, select { padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); width: 100%; font-size: 1rem; min-height: 44px; }
     
-    /* Styled Placeholders to avoid confusion */
     input::placeholder {
       color: #94A3B8;
       font-style: italic;
@@ -153,44 +152,44 @@
     .modal.active { display: flex; }
     .modal-card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     
-    /* Shared Navy / Black & White Invoice Styling */
+    /* Professional Navy / Executive Invoice Styling */
     .invoice-wrapper { 
       background: #FFFFFF !important; 
-      padding: 30px; 
+      padding: 35px; 
       width: 100%; 
-      max-width: 650px; 
+      max-width: 680px; 
       font-family: 'Segoe UI', Arial, sans-serif; 
       color: #0F172A; 
       border: 1px solid #CBD5E1; 
       margin: 0 auto;
       white-space: normal;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
       border-radius: 8px;
     }
-    .inv-header-flex { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0F172A; padding-bottom: 12px; margin-bottom: 15px; }
-    .inv-company-title { font-size: 16px; font-weight: 800; color: #0F172A; text-transform: uppercase; }
-    .inv-sub-text { font-size: 11px; color: #475569; margin-top: 2px; }
-    .inv-type-title { font-size: 20px; font-weight: 800; color: #0F172A; text-align: right; text-transform: uppercase; letter-spacing: 1px; }
+    .inv-header-flex { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0F172A; padding-bottom: 14px; margin-bottom: 18px; }
+    .inv-company-title { font-size: 18px; font-weight: 800; color: #0F172A; text-transform: uppercase; letter-spacing: 0.5px; }
+    .inv-sub-text { font-size: 11px; color: #475569; margin-top: 3px; font-weight: 600; }
+    .inv-type-title { font-size: 22px; font-weight: 800; color: #0F172A; text-align: right; text-transform: uppercase; letter-spacing: 1px; }
     .inv-meta-grid { font-size: 12px; text-align: right; margin-top: 4px; color: #0F172A; }
     .inv-meta-grid strong { font-weight: 700; }
 
-    .inv-billed-box { background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 12px; border-radius: 6px; margin-bottom: 15px; font-size: 12px; line-height: 1.4; }
+    .inv-billed-box { background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px 14px; border-radius: 6px; margin-bottom: 18px; font-size: 12px; line-height: 1.5; }
     .inv-billed-title { font-weight: 800; font-size: 11px; color: #475569; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
 
-    .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; }
-    .inv-table th { background: #0F172A !important; color: #FFFFFF !important; font-weight: 700; text-transform: uppercase; font-size: 11px; padding: 8px 6px; text-align: left; }
-    .inv-table td { padding: 8px 6px; border-bottom: 1px solid #E2E8F0; vertical-align: top; }
+    .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 12px; }
+    .inv-table th { background: #0F172A !important; color: #FFFFFF !important; font-weight: 700; text-transform: uppercase; font-size: 10.5px; padding: 9px 8px; text-align: left; letter-spacing: 0.3px; }
+    .inv-table td { padding: 9px 8px; border-bottom: 1px solid #E2E8F0; vertical-align: top; }
     
-    .inv-totals { text-align: right; font-size: 13px; margin-top: 10px; color: #0F172A; }
-    .inv-totals .grand-total { font-weight: 800; border-top: 2px solid #0F172A; border-bottom: 2px solid #0F172A; padding: 6px 0; font-size: 15px; margin-top: 6px; }
-    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 25px; font-size: 12px; }
+    .inv-totals { text-align: right; font-size: 13px; margin-top: 12px; color: #0F172A; }
+    .inv-totals .grand-total { font-weight: 800; border-top: 2px solid #0F172A; border-bottom: 2px solid #0F172A; padding: 8px 0; font-size: 15px; margin-top: 6px; }
+    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; font-size: 12px; }
     
     .invoice-actions-bar {
       display: flex;
       gap: 10px;
       justify-content: flex-end;
       margin-top: 15px;
-      max-width: 650px;
+      max-width: 680px;
       margin-left: auto;
       margin-right: auto;
     }
@@ -229,7 +228,7 @@
       .invoice-wrapper { 
         border: none !important; 
         width: 100% !important; 
-        max-width: 650px !important; 
+        max-width: 680px !important; 
         padding: 10px 15px !important; 
         color: #000000 !important; 
         margin: 0 auto !important; 
@@ -245,7 +244,7 @@
       header { flex-direction: column; align-items: flex-start; }
       .header-actions { width: 100%; justify-content: space-between; }
       body { padding: 10px; }
-      .invoice-wrapper { padding: 15px; }
+      .invoice-wrapper { padding: 20px 15px; }
     }
   </style>
 </head>
@@ -377,7 +376,7 @@
       <div class="form-row">
         <div><label>Delivery Date</label><input type="date" id="t-date" required></div>
         <div><label>Invoice / Log Issue Date</label><input type="date" id="t-issuedate" required></div>
-        <div><label>Bill To (Logistics Partner)</label><input type="text" id="t-billto" placeholder="e.g. TurboTix Logistics L.L.C" required></div>
+        <div><label>Bill To</label><input type="text" id="t-billto" placeholder="e.g. TurboTix Logistics L.L.C" required></div>
         <div><label>Partner TRN</label><input type="text" id="t-trn" placeholder="e.g. 104700974900003"></div>
       </div>
       <div class="form-row">
@@ -427,7 +426,7 @@
 
   <!-- PDF Invoice Modal -->
   <div class="modal" id="invoiceModal">
-    <div style="width: 100%; max-width: 650px; padding: 10px 0;">
+    <div style="width: 100%; max-width: 680px; padding: 10px 0;">
       
       <div class="invoice-wrapper" id="printableInvoice"></div>
 
@@ -799,19 +798,19 @@
         </div>
 
         <div class="inv-billed-box">
-          <div class="inv-billed-title">BILLED TO (LOGISTICS PARTNER):</div>
+          <div class="inv-billed-title">BILLED TO:</div>
           <strong>${t.billto}</strong><br>
           TRN: ${t.trn || 'N/A'}<br>
           ${t.address || ''}
         </div>
 
-        <div style="font-size:12px; border-bottom: 1px dashed #CBD5E1; padding-bottom:10px; margin-bottom:15px; line-height:1.5;">
-          <strong>CLIENT REFERENCE & SHIPMENT DETAILS</strong><br>
+        <div style="font-size:12px; border-bottom: 1px dashed #CBD5E1; padding-bottom:12px; margin-bottom:15px; line-height:1.6;">
+          <strong>SHIPMENT & DELIVERY DETAILS</strong><br>
           Client Name: <strong>${t.client}</strong><br>
-          Delivery Note: ${t.dn || 'N/A'}<br>
+          Delivery Note #: ${t.dn || 'N/A'}<br>
           Delivery Date: ${delivDateStr}<br>
           Route: ${t.origin} ➔ ${t.dest}<br>
-          Vehicle / Plate No: ${t.plate}
+          Vehicle / Plate No: <strong>${t.plate}</strong>
         </div>
 
         <table class="inv-table">
@@ -857,7 +856,7 @@
         </div>
       `;
     } else {
-      // MULTIPLE TRIPS FORMAT (Table Grid Layout)
+      // MULTIPLE TRIPS FORMAT (Clean Table Grid Layout)
       let tableRowsHtml = '';
       let subtotal = 0;
 
@@ -873,7 +872,7 @@
               <span style="font-size:11px; color:#475569;">DN #: ${t.dn || 'N/A'}</span><br>
               <span style="font-size:11px; color:#475569;">Route: ${t.origin} ➔ ${t.dest}</span>
             </td>
-            <td>${t.plate}</td>
+            <td><strong>${t.plate}</strong></td>
             <td style="text-align:center;">1</td>
             <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
             <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
@@ -891,7 +890,7 @@
                 <span style="font-size:11px; color:#475569;">DN #: ${t.dn || 'N/A'}</span><br>
                 <span style="font-size:11px; color:#475569;">Receipt No: ${t.receipt || 'N/A'}</span>
               </td>
-              <td>${t.plate}</td>
+              <td><strong>${t.plate}</strong></td>
               <td style="text-align:center;">1</td>
               <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
               <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
@@ -917,7 +916,7 @@
         </div>
 
         <div class="inv-billed-box">
-          <div class="inv-billed-title">BILLED TO (LOGISTICS PARTNER):</div>
+          <div class="inv-billed-title">BILLED TO:</div>
           <strong>${baseTrip.billto}</strong><br>
           TRN: ${baseTrip.trn || 'N/A'}<br>
           ${baseTrip.address || ''}
@@ -927,9 +926,9 @@
           <thead>
             <tr>
               <th style="width:12%;">DATE</th>
-              <th style="width:40%;">CLIENT / ROUTE DETAILS</th>
-              <th style="width:16%;">VEHICLE / REF</th>
-              <th style="width:8%; text-align:center;">TRIPS</th>
+              <th style="width:38%;">CLIENT / ROUTE DETAILS</th>
+              <th style="width:18%;">PLATE NO.</th>
+              <th style="width:8%; text-align:center;">QTY</th>
               <th style="width:12%; text-align:right;">RATE</th>
               <th style="width:12%; text-align:right;">AMOUNT</th>
             </tr>
