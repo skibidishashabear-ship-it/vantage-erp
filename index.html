@@ -11,7 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script>
-    // Force page to jump back to the top on refresh
     if ('scrollRestoration' in history) {
       history.scrollRestoration = 'manual';
     }
@@ -34,7 +33,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding: 15px; -webkit-tap-highlight-color: transparent; }
 
-    /* Startup Loading Overlay */
     #initialLoader {
       position: fixed;
       top: 0;
@@ -130,10 +128,7 @@
     button.danger { background: var(--danger); }
     input, select { padding: 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); width: 100%; font-size: 1rem; min-height: 44px; }
     
-    input::placeholder {
-      color: #94A3B8;
-      font-style: italic;
-    }
+    input::placeholder { color: #94A3B8; font-style: italic; }
 
     .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 12px; }
     label { font-size: 0.8rem; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 4px; }
@@ -152,10 +147,10 @@
     .modal.active { display: flex; }
     .modal-card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     
-    /* Professional Executive Invoice Styling with Background Graphics & Left Header */
+    /* Printable Invoice Section */
     .invoice-wrapper { 
-      background: #FFFFFF url('IMG-20261005-WA0009.jpg') no-repeat top center !important; 
-      background-size: 100% auto !important;
+      position: relative;
+      background: #FFFFFF;
       padding: 120px 30px 30px 30px; 
       width: 100%; 
       max-width: 680px; 
@@ -166,9 +161,26 @@
       white-space: normal;
       box-shadow: 0 10px 30px rgba(0,0,0,0.12);
       border-radius: 8px;
+      overflow: hidden;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
+    
+    .inv-header-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: auto;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .inv-content {
+      position: relative;
+      z-index: 1;
+    }
+
     .inv-header-flex { display: flex; justify-content: flex-start; align-items: flex-start; border-bottom: 2px solid #0F172A; padding-bottom: 14px; margin-bottom: 18px; }
     .inv-type-title { font-size: 22px; font-weight: 800; color: #0F172A; text-align: left; text-transform: uppercase; letter-spacing: 1px; }
     .inv-meta-grid { font-size: 12px; text-align: left; margin-top: 4px; color: #0F172A; }
@@ -241,10 +253,13 @@
         box-shadow: none !important; 
         page-break-inside: avoid !important;
         break-inside: avoid !important;
-        background: #FFFFFF url('IMG-20261005-WA0009.jpg') no-repeat top center !important; 
-        background-size: 100% auto !important;
+        background: #FFFFFF !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+      }
+      .inv-header-bg {
+        display: block !important;
+        visibility: visible !important;
       }
       .inv-table th {
         background-color: #0F172A !important;
@@ -263,7 +278,6 @@
 </head>
 <body>
 
-<!-- Startup Loading Overlay -->
 <div id="initialLoader">
   <div class="loader-brand">
     <svg class="mascot-lg" viewBox="0 0 100 100">
@@ -279,7 +293,6 @@
   <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">Loading workspace...</p>
 </div>
 
-<!-- Login Modal -->
 <div class="modal" id="loginModal">
   <div class="modal-card">
     <h2 style="color:var(--accent); text-align:center; margin-bottom:10px;">Vantage ERP Access</h2>
@@ -299,10 +312,8 @@
   </div>
 </div>
 
-<!-- Workspace -->
 <main id="appContent">
 
-  <!-- Admin User Management Modal -->
   <div class="modal" id="adminUserModal">
     <div class="modal-card">
       <h3 style="color:var(--accent); margin-bottom:15px;">Admin User Management</h3>
@@ -324,7 +335,6 @@
     </div>
   </div>
 
-  <!-- Details Modal -->
   <div class="modal" id="detailsModal">
     <div class="modal-card" style="max-width: 550px;">
       <h3 style="color:var(--accent); margin-bottom:15px;">Freight Trip Details</h3>
@@ -437,7 +447,6 @@
     </div>
   </div>
 
-  <!-- PDF Invoice Modal -->
   <div class="modal" id="invoiceModal">
     <div style="width: 100%; max-width: 680px; padding: 10px 0;">
       
@@ -771,15 +780,13 @@
     const selectedIds = Array.from(document.querySelectorAll('.row-select:checked')).map(cb => cb.value);
     if (selectedIds.length === 0) return alert('Select at least one trip to generate an invoice.');
     
-    // Sort selected trips chronologically by timestamp
     const selectedTrips = localData.trips
       .filter(t => selectedIds.includes(t.id))
       .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
     const isMultiple = selectedTrips.length > 1;
-    const baseTrip = selectedTrips[selectedTrips.length - 1]; // Latest trip for base info
+    const baseTrip = selectedTrips[selectedTrips.length - 1];
 
-    // Determine Invoice Number: append '-M' if multiple trips selected
     let rawInvNo = baseTrip.invNo || 'INV-2026-0001';
     let finalInvNo = isMultiple ? `${rawInvNo}-M` : rawInvNo;
 
@@ -790,89 +797,89 @@
     const wrapper = document.getElementById('printableInvoice');
 
     if (!isMultiple) {
-      // SINGLE TRIP FORMAT
       const t = selectedTrips[0];
       const delivDateStr = t.date ? t.date.split('-').reverse().join('/') : 'N/A';
       const totalCost = (t.freight + (t.tollcost || 0)).toFixed(2);
 
       wrapper.innerHTML = `
-        <div class="inv-header-flex">
-          <div>
-            <div class="inv-type-title">INVOICE</div>
-            <div class="inv-meta-grid">
-              <div>Invoice No: <strong>${finalInvNo}</strong></div>
-              <div>Date: <strong>${issueDateStr}</strong></div>
+        <img src="./IMG-20261005-WA0009.jpg" class="inv-header-bg" alt="Header Graphic">
+        <div class="inv-content">
+          <div class="inv-header-flex">
+            <div>
+              <div class="inv-type-title">INVOICE</div>
+              <div class="inv-meta-grid">
+                <div>Invoice No: <strong>${finalInvNo}</strong></div>
+                <div>Date: <strong>${issueDateStr}</strong></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="inv-billed-box">
-          <div class="inv-billed-title">BILLED TO:</div>
-          <strong>${t.billto}</strong><br>
-          TRN: ${t.trn || 'N/A'}<br>
-          ${t.address || ''}
-        </div>
+          <div class="inv-billed-box">
+            <div class="inv-billed-title">BILLED TO:</div>
+            <strong>${t.billto}</strong><br>
+            TRN: ${t.trn || 'N/A'}<br>
+            ${t.address || ''}
+          </div>
 
-        <div style="font-size:12px; border-bottom: 1px dashed #CBD5E1; padding-bottom:12px; margin-bottom:15px; line-height:1.6;">
-          <strong>SHIPMENT & DELIVERY DETAILS</strong><br>
-          Client Name: <strong>${t.client}</strong><br>
-          Delivery Note #: ${t.dn || 'N/A'}<br>
-          Delivery Date: ${delivDateStr}<br>
-          Route: ${t.origin} ➔ ${t.dest}<br>
-          Vehicle / Plate No: <strong>${t.plate}</strong>
-        </div>
+          <div style="font-size:12px; border-bottom: 1px dashed #CBD5E1; padding-bottom:12px; margin-bottom:15px; line-height:1.6;">
+            <strong>SHIPMENT & DELIVERY DETAILS</strong><br>
+            Client Name: <strong>${t.client}</strong><br>
+            Delivery Note #: ${t.dn || 'N/A'}<br>
+            Delivery Date: ${delivDateStr}<br>
+            Route: ${t.origin} ➔ ${t.dest}<br>
+            Vehicle / Plate No: <strong>${t.plate}</strong>
+          </div>
 
-        <table class="inv-table">
-          <thead>
-            <tr>
-              <th>DESCRIPTION OF SERVICES</th>
-              <th style="text-align:center;">QTY</th>
-              <th style="text-align:right;">UNIT PRICE</th>
-              <th style="text-align:right;">TOTAL</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Freight / Transportation Services</td>
-              <td style="text-align:center;">1</td>
-              <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
-              <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
-            </tr>
-            ${t.tollcost > 0 ? `
-            <tr>
-              <td>
-                Toll Tax: ${t.tollname || 'Salik'}<br>
-                <span style="font-size:11px; color:#64748B;">Receipt No: ${t.receipt || 'N/A'}</span>
-              </td>
-              <td style="text-align:center;">1</td>
-              <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
-              <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
-            </tr>` : ''}
-          </tbody>
-        </table>
+          <table class="inv-table">
+            <thead>
+              <tr>
+                <th>DESCRIPTION OF SERVICES</th>
+                <th style="text-align:center;">QTY</th>
+                <th style="text-align:right;">UNIT PRICE</th>
+                <th style="text-align:right;">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Freight / Transportation Services</td>
+                <td style="text-align:center;">1</td>
+                <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
+                <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
+              </tr>
+              ${t.tollcost > 0 ? `
+              <tr>
+                <td>
+                  Toll Tax: ${t.tollname || 'Salik'}<br>
+                  <span style="font-size:11px; color:#64748B;">Receipt No: ${t.receipt || 'N/A'}</span>
+                </td>
+                <td style="text-align:center;">1</td>
+                <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+                <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+              </tr>` : ''}
+            </tbody>
+          </table>
 
-        <div class="inv-totals">
-          <div>Subtotal: <strong>${totalCost} AED</strong></div>
-          <div class="grand-total">Total Due: <strong>${totalCost} AED</strong></div>
-        </div>
+          <div class="inv-totals">
+            <div>Subtotal: <strong>${totalCost} AED</strong></div>
+            <div class="grand-total">Total Due: <strong>${totalCost} AED</strong></div>
+          </div>
 
-        <div class="stamp-container">
-          <div>
-            <strong>LOAD LION TRANSPORT L.L.C</strong><br><br>
-            ___________________________<br>
-            Signature & Company Stamp
+          <div class="stamp-container">
+            <div>
+              <strong>LOAD LION TRANSPORT L.L.C</strong><br><br>
+              ___________________________<br>
+              Signature & Company Stamp
+            </div>
           </div>
         </div>
       `;
     } else {
-      // MULTIPLE TRIPS FORMAT (Clean Table Grid Layout)
       let tableRowsHtml = '';
       let subtotal = 0;
 
       selectedTrips.forEach(t => {
         const dateStr = t.date ? t.date.split('-').reverse().join('/') : 'N/A';
         
-        // Freight Line
         tableRowsHtml += `
           <tr>
             <td>${dateStr}</td>
@@ -889,7 +896,6 @@
         `;
         subtotal += t.freight;
 
-        // Toll Line if applicable
         if (t.tollcost > 0) {
           tableRowsHtml += `
             <tr>
@@ -910,49 +916,52 @@
       });
 
       wrapper.innerHTML = `
-        <div class="inv-header-flex">
-          <div>
-            <div class="inv-type-title">INVOICE</div>
-            <div class="inv-meta-grid">
-              <div>Invoice No: <strong>${finalInvNo}</strong></div>
-              <div>Date: <strong>${issueDateStr}</strong></div>
+        <img src="./IMG-20261005-WA0009.jpg" class="inv-header-bg" alt="Header Graphic">
+        <div class="inv-content">
+          <div class="inv-header-flex">
+            <div>
+              <div class="inv-type-title">INVOICE</div>
+              <div class="inv-meta-grid">
+                <div>Invoice No: <strong>${finalInvNo}</strong></div>
+                <div>Date: <strong>${issueDateStr}</strong></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="inv-billed-box">
-          <div class="inv-billed-title">BILLED TO:</div>
-          <strong>${baseTrip.billto}</strong><br>
-          TRN: ${baseTrip.trn || 'N/A'}<br>
-          ${baseTrip.address || ''}
-        </div>
+          <div class="inv-billed-box">
+            <div class="inv-billed-title">BILLED TO:</div>
+            <strong>${baseTrip.billto}</strong><br>
+            TRN: ${baseTrip.trn || 'N/A'}<br>
+            ${baseTrip.address || ''}
+          </div>
 
-        <table class="inv-table">
-          <thead>
-            <tr>
-              <th style="width:12%;">DATE</th>
-              <th style="width:38%;">CLIENT / ROUTE DETAILS</th>
-              <th style="width:18%;">PLATE NO.</th>
-              <th style="width:8%; text-align:center;">QTY</th>
-              <th style="width:12%; text-align:right;">RATE</th>
-              <th style="width:12%; text-align:right;">AMOUNT</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRowsHtml}
-          </tbody>
-        </table>
+          <table class="inv-table">
+            <thead>
+              <tr>
+                <th style="width:12%;">DATE</th>
+                <th style="width:38%;">CLIENT / ROUTE DETAILS</th>
+                <th style="width:18%;">PLATE NO.</th>
+                <th style="width:8%; text-align:center;">QTY</th>
+                <th style="width:12%; text-align:right;">RATE</th>
+                <th style="width:12%; text-align:right;">AMOUNT</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRowsHtml}
+            </tbody>
+          </table>
 
-        <div class="inv-totals">
-          <div>Subtotal: <strong>${subtotal.toFixed(2)} AED</strong></div>
-          <div class="grand-total">Total Due: <strong>${subtotal.toFixed(2)} AED</strong></div>
-        </div>
+          <div class="inv-totals">
+            <div>Subtotal: <strong>${subtotal.toFixed(2)} AED</strong></div>
+            <div class="grand-total">Total Due: <strong>${subtotal.toFixed(2)} AED</strong></div>
+          </div>
 
-        <div class="stamp-container">
-          <div>
-            <strong>LOAD LION TRANSPORT L.L.C</strong><br><br>
-            ___________________________<br>
-            Signature & Company Stamp
+          <div class="stamp-container">
+            <div>
+              <strong>LOAD LION TRANSPORT L.L.C</strong><br><br>
+              ___________________________<br>
+              Signature & Company Stamp
+            </div>
           </div>
         </div>
       `;
