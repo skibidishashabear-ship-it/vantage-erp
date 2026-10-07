@@ -153,38 +153,44 @@
     .modal.active { display: flex; }
     .modal-card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     
+    /* Shared Navy / Black & White Invoice Styling */
     .invoice-wrapper { 
       background: #FFFFFF !important; 
-      padding: 35px 30px; 
+      padding: 30px; 
       width: 100%; 
-      max-width: 620px; 
-      font-family: Arial, Helvetica, sans-serif; 
-      color: #000000; 
+      max-width: 650px; 
+      font-family: 'Segoe UI', Arial, sans-serif; 
+      color: #0F172A; 
       border: 1px solid #CBD5E1; 
       margin: 0 auto;
       white-space: normal;
       box-shadow: 0 10px 30px rgba(0,0,0,0.15);
       border-radius: 8px;
     }
-    .inv-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 15px; }
-    .inv-header h1 { font-size: 20px; font-weight: bold; text-transform: uppercase; color: #000; margin-bottom: 4px; letter-spacing: 1px; }
-    .inv-sub { text-align: center; font-size: 18px; font-weight: bold; margin: 10px 0 15px 0; letter-spacing: 3px; text-transform: uppercase; border-bottom: 1px dashed #000; padding-bottom: 8px; }
-    .inv-meta { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; border-bottom: 1px dashed #000; padding-bottom: 8px; margin-bottom: 15px; }
-    .inv-section { border-bottom: 1px dashed #000; padding-bottom: 10px; margin-bottom: 15px; font-size: 12px; line-height: 1.5; }
-    .inv-section h4 { text-transform: uppercase; margin-bottom: 4px; font-weight: bold; font-size: 11px; color: #000; }
-    .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 12px; }
-    .inv-table th { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 8px 6px; text-align: left; background: transparent !important; color: #000 !important; font-weight: bold; }
-    .inv-table td { padding: 8px 6px; border-bottom: 1px solid #E2E8F0; }
-    .inv-totals { text-align: right; font-size: 13px; margin-top: 15px; }
-    .inv-totals .grand-total { font-weight: bold; border-top: 2px solid #000; border-bottom: 2px solid #000; padding: 8px 0; font-size: 15px; margin-top: 8px; }
-    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; font-size: 12px; }
+    .inv-header-flex { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0F172A; padding-bottom: 12px; margin-bottom: 15px; }
+    .inv-company-title { font-size: 16px; font-weight: 800; color: #0F172A; text-transform: uppercase; }
+    .inv-sub-text { font-size: 11px; color: #475569; margin-top: 2px; }
+    .inv-type-title { font-size: 20px; font-weight: 800; color: #0F172A; text-align: right; text-transform: uppercase; letter-spacing: 1px; }
+    .inv-meta-grid { font-size: 12px; text-align: right; margin-top: 4px; color: #0F172A; }
+    .inv-meta-grid strong { font-weight: 700; }
+
+    .inv-billed-box { background: #F8FAFC; border: 1px solid #E2E8F0; padding: 10px 12px; border-radius: 6px; margin-bottom: 15px; font-size: 12px; line-height: 1.4; }
+    .inv-billed-title { font-weight: 800; font-size: 11px; color: #475569; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+
+    .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; }
+    .inv-table th { background: #0F172A !important; color: #FFFFFF !important; font-weight: 700; text-transform: uppercase; font-size: 11px; padding: 8px 6px; text-align: left; }
+    .inv-table td { padding: 8px 6px; border-bottom: 1px solid #E2E8F0; vertical-align: top; }
+    
+    .inv-totals { text-align: right; font-size: 13px; margin-top: 10px; color: #0F172A; }
+    .inv-totals .grand-total { font-weight: 800; border-top: 2px solid #0F172A; border-bottom: 2px solid #0F172A; padding: 6px 0; font-size: 15px; margin-top: 6px; }
+    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 25px; font-size: 12px; }
     
     .invoice-actions-bar {
       display: flex;
       gap: 10px;
       justify-content: flex-end;
       margin-top: 15px;
-      max-width: 620px;
+      max-width: 650px;
       margin-left: auto;
       margin-right: auto;
     }
@@ -423,54 +429,7 @@
   <div class="modal" id="invoiceModal">
     <div style="width: 100%; max-width: 650px; padding: 10px 0;">
       
-      <div class="invoice-wrapper" id="printableInvoice">
-        <div class="inv-sub">INVOICE</div>
-        
-        <div class="inv-meta">
-          <div>INVOICE NO: <span id="inv-no">INV-2026-0001</span></div>
-          <div>ISSUE DATE: <span id="inv-date"></span></div>
-        </div>
-
-        <div class="inv-section">
-          <h4>BILL TO:</h4>
-          <strong id="inv-billto"></strong><br>
-          TRN: <span id="inv-trn"></span><br>
-          <span id="inv-address"></span>
-        </div>
-
-        <div class="inv-section">
-          <h4>CLIENT REFERENCE:</h4>
-          Client Name: <strong id="inv-client"></strong><br>
-          Delivery Note: <span id="inv-dn-display"></span><br>
-          Delivery Date: <span id="inv-deliv-date"></span><br>
-          Route: <span id="inv-route-display"></span><br>
-          Vehicle / Plate No: <span id="inv-plate-display"></span>
-        </div>
-
-        <table class="inv-table">
-          <thead>
-            <tr>
-              <th>DESCRIPTION OF SERVICES</th>
-              <th style="text-align:center;">QTY</th>
-              <th style="text-align:right;">UNIT PRICE</th>
-              <th style="text-align:right;">TOTAL</th>
-            </tr>
-          </thead>
-          <tbody id="inv-items"></tbody>
-        </table>
-
-        <div class="inv-totals">
-          <div>SUBTOTAL: <span id="inv-subtotal"></span> AED</div>
-          <div class="grand-total">TOTAL DUE: <span id="inv-total"></span> AED</div>
-        </div>
-
-        <div class="stamp-container">
-          <div>
-            <strong>LOAD LION TRANSPORT L.L.C</strong><br><br>
-            Signature & Company Stamp:
-          </div>
-        </div>
-      </div>
+      <div class="invoice-wrapper" id="printableInvoice"></div>
 
       <div class="invoice-actions-bar">
         <button class="outline" onclick="closeInvoice()" style="background:white; padding: 10px 20px; min-height: 42px;">Close</button>
@@ -800,65 +759,201 @@
     const selectedIds = Array.from(document.querySelectorAll('.row-select:checked')).map(cb => cb.value);
     if (selectedIds.length === 0) return alert('Select at least one trip to generate an invoice.');
     
-    const selectedTrips = localData.trips.filter(t => selectedIds.includes(t.id));
-    const baseTrip = selectedTrips[0];
+    // Sort selected trips chronologically by timestamp
+    const selectedTrips = localData.trips
+      .filter(t => selectedIds.includes(t.id))
+      .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
-    document.getElementById('inv-no').innerText = baseTrip.invNo || 'INV-2026-0001';
-    
+    const isMultiple = selectedTrips.length > 1;
+    const baseTrip = selectedTrips[selectedTrips.length - 1]; // Latest trip for base info
+
+    // Determine Invoice Number: append '-M' if multiple trips selected
+    let rawInvNo = baseTrip.invNo || 'INV-2026-0001';
+    let finalInvNo = isMultiple ? `${rawInvNo}-M` : rawInvNo;
+
     const issueDateStr = baseTrip.issueDate 
       ? baseTrip.issueDate.split('-').reverse().join('/') 
       : new Date().toLocaleDateString('en-GB');
-    document.getElementById('inv-date').innerText = issueDateStr;
 
-    document.getElementById('inv-billto').innerText = baseTrip.billto;
-    document.getElementById('inv-trn').innerText = baseTrip.trn || 'N/A';
-    document.getElementById('inv-address').innerText = baseTrip.address || '';
-    document.getElementById('inv-client').innerText = baseTrip.client;
+    const wrapper = document.getElementById('printableInvoice');
 
-    const plates = [...new Set(selectedTrips.map(t => t.plate))].join(', ');
-    const dns = [...new Set(selectedTrips.map(t => t.dn).filter(Boolean))].join(', ');
-    const delivDates = [...new Set(selectedTrips.map(t => t.date.split('-').reverse().join('/')))].join(', ');
-    const routes = selectedTrips.map(t => `Origin (${t.origin}) to Destination (${t.dest})`).join('; ');
-    
-    document.getElementById('inv-plate-display').innerText = plates;
-    document.getElementById('inv-dn-display').innerText = dns || 'N/A';
-    document.getElementById('inv-deliv-date').innerText = delivDates;
-    document.getElementById('inv-route-display').innerText = routes;
+    if (!isMultiple) {
+      // SINGLE TRIP FORMAT
+      const t = selectedTrips[0];
+      const delivDateStr = t.date ? t.date.split('-').reverse().join('/') : 'N/A';
+      const totalCost = (t.freight + (t.tollcost || 0)).toFixed(2);
 
-    const tbody = document.getElementById('inv-items');
-    tbody.innerHTML = '';
-    let subtotal = 0;
+      wrapper.innerHTML = `
+        <div class="inv-header-flex">
+          <div>
+            <div class="inv-company-title">LOAD LION TRANSPORT L.L.C</div>
+            <div class="inv-sub-text">TRN / Tax ID: ${t.trn || '104700974900003'}</div>
+          </div>
+          <div>
+            <div class="inv-type-title">INVOICE</div>
+            <div class="inv-meta-grid">
+              <div>Invoice No: <strong>${finalInvNo}</strong></div>
+              <div>Date: <strong>${issueDateStr}</strong></div>
+            </div>
+          </div>
+        </div>
 
-    selectedTrips.forEach(t => {
-      tbody.innerHTML += `
-        <tr>
-          <td>Freight / Transportation Services</td>
-          <td style="text-align:center;">1</td>
-          <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
-          <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
-        </tr>
+        <div class="inv-billed-box">
+          <div class="inv-billed-title">BILLED TO (LOGISTICS PARTNER):</div>
+          <strong>${t.billto}</strong><br>
+          TRN: ${t.trn || 'N/A'}<br>
+          ${t.address || ''}
+        </div>
+
+        <div style="font-size:12px; border-bottom: 1px dashed #CBD5E1; padding-bottom:10px; margin-bottom:15px; line-height:1.5;">
+          <strong>CLIENT REFERENCE & SHIPMENT DETAILS</strong><br>
+          Client Name: <strong>${t.client}</strong><br>
+          Delivery Note: ${t.dn || 'N/A'}<br>
+          Delivery Date: ${delivDateStr}<br>
+          Route: ${t.origin} ➔ ${t.dest}<br>
+          Vehicle / Plate No: ${t.plate}
+        </div>
+
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th>DESCRIPTION OF SERVICES</th>
+              <th style="text-align:center;">QTY</th>
+              <th style="text-align:right;">UNIT PRICE</th>
+              <th style="text-align:right;">TOTAL</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Freight / Transportation Services</td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
+              <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
+            </tr>
+            ${t.tollcost > 0 ? `
+            <tr>
+              <td>
+                Toll Tax: ${t.tollname || 'Salik'}<br>
+                <span style="font-size:11px; color:#64748B;">Receipt No: ${t.receipt || 'N/A'}</span>
+              </td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+              <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+            </tr>` : ''}
+          </tbody>
+        </table>
+
+        <div class="inv-totals">
+          <div>Subtotal: <strong>${totalCost} AED</strong></div>
+          <div class="grand-total">Total Due: <strong>${totalCost} AED</strong></div>
+        </div>
+
+        <div class="stamp-container">
+          <div>
+            <strong>LOAD LION TRANSPORT L.L.C</strong><br><br>
+            ___________________________<br>
+            Signature & Company Stamp
+          </div>
+        </div>
       `;
-      subtotal += t.freight;
-      
-      if (t.tollcost > 0) {
-        tbody.innerHTML += `
+    } else {
+      // MULTIPLE TRIPS FORMAT (Table Grid Layout)
+      let tableRowsHtml = '';
+      let subtotal = 0;
+
+      selectedTrips.forEach(t => {
+        const dateStr = t.date ? t.date.split('-').reverse().join('/') : 'N/A';
+        
+        // Freight Line
+        tableRowsHtml += `
           <tr>
+            <td>${dateStr}</td>
             <td>
-              Toll Tax: ${t.tollname || 'Salik'}<br>
-              <span style="font-size:11px; color:#555;">Receipt No: ${t.receipt || 'N/A'}</span>
+              <strong>Client: ${t.client}</strong><br>
+              <span style="font-size:11px; color:#475569;">DN #: ${t.dn || 'N/A'}</span><br>
+              <span style="font-size:11px; color:#475569;">Route: ${t.origin} ➔ ${t.dest}</span>
             </td>
+            <td>${t.plate}</td>
             <td style="text-align:center;">1</td>
-            <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
-            <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+            <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
+            <td style="text-align:right;">${t.freight.toFixed(2)} AED</td>
           </tr>
         `;
-        subtotal += t.tollcost;
-      }
-    });
+        subtotal += t.freight;
 
-    document.getElementById('inv-subtotal').innerText = subtotal.toFixed(2);
-    document.getElementById('inv-total').innerText = subtotal.toFixed(2);
-    
+        // Toll Line if applicable
+        if (t.tollcost > 0) {
+          tableRowsHtml += `
+            <tr>
+              <td>${dateStr}</td>
+              <td>
+                <strong>Toll Tax: ${t.tollname || 'Salik'}</strong><br>
+                <span style="font-size:11px; color:#475569;">DN #: ${t.dn || 'N/A'}</span><br>
+                <span style="font-size:11px; color:#475569;">Receipt No: ${t.receipt || 'N/A'}</span>
+              </td>
+              <td>${t.plate}</td>
+              <td style="text-align:center;">1</td>
+              <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+              <td style="text-align:right;">${t.tollcost.toFixed(2)} AED</td>
+            </tr>
+          `;
+          subtotal += t.tollcost;
+        }
+      });
+
+      wrapper.innerHTML = `
+        <div class="inv-header-flex">
+          <div>
+            <div class="inv-company-title">LOAD LION TRANSPORT L.L.C</div>
+            <div class="inv-sub-text">TRN / Tax ID: ${baseTrip.trn || '104700974900003'}</div>
+          </div>
+          <div>
+            <div class="inv-type-title">INVOICE</div>
+            <div class="inv-meta-grid">
+              <div>Invoice No: <strong>${finalInvNo}</strong></div>
+              <div>Date: <strong>${issueDateStr}</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="inv-billed-box">
+          <div class="inv-billed-title">BILLED TO (LOGISTICS PARTNER):</div>
+          <strong>${baseTrip.billto}</strong><br>
+          TRN: ${baseTrip.trn || 'N/A'}<br>
+          ${baseTrip.address || ''}
+        </div>
+
+        <table class="inv-table">
+          <thead>
+            <tr>
+              <th style="width:12%;">DATE</th>
+              <th style="width:40%;">CLIENT / ROUTE DETAILS</th>
+              <th style="width:16%;">VEHICLE / REF</th>
+              <th style="width:8%; text-align:center;">TRIPS</th>
+              <th style="width:12%; text-align:right;">RATE</th>
+              <th style="width:12%; text-align:right;">AMOUNT</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHtml}
+          </tbody>
+        </table>
+
+        <div class="inv-totals">
+          <div>Subtotal: <strong>${subtotal.toFixed(2)} AED</strong></div>
+          <div class="grand-total">Total Due: <strong>${subtotal.toFixed(2)} AED</strong></div>
+        </div>
+
+        <div class="stamp-container">
+          <div>
+            <strong>LOAD LION TRANSPORT L.L.C</strong><br><br>
+            ___________________________<br>
+            Signature & Company Stamp
+          </div>
+        </div>
+      `;
+    }
+
     document.getElementById('invoiceModal').classList.add('active');
   }
 
