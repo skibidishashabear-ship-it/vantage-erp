@@ -29,6 +29,11 @@
       --border: #E2E8F0;
       --danger: #EF4444;
       --blue: #3B82F6;
+      
+      /* Navy Theme Accent Colors */
+      --navy-primary: #1B365D;
+      --navy-light-bg: rgba(240, 244, 248, 0.55);
+      --navy-border: #CBD5E1;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding: 15px; -webkit-tap-highlight-color: transparent; }
@@ -151,9 +156,10 @@
     .invoice-wrapper { 
       position: relative;
       background: #FFFFFF;
-      padding: 120px 30px 30px 30px; 
+      padding: 160px 30px 50px 30px; /* Pushed content lower down */
       width: 100%; 
       max-width: 680px; 
+      min-height: 960px;
       font-family: 'Segoe UI', Arial, sans-serif; 
       color: #0F172A; 
       border: 1px solid #CBD5E1; 
@@ -171,32 +177,122 @@
       top: 0;
       left: 0;
       width: 100%;
-      height: auto;
+      height: 100%;
+      object-fit: cover;
       z-index: 0;
       pointer-events: none;
+      opacity: 0.85;
     }
 
     .inv-content {
       position: relative;
       z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
     }
 
-    .inv-header-flex { display: flex; justify-content: flex-start; align-items: flex-start; border-bottom: 2px solid #0F172A; padding-bottom: 14px; margin-bottom: 18px; }
-    .inv-type-title { font-size: 22px; font-weight: 800; color: #0F172A; text-align: left; text-transform: uppercase; letter-spacing: 1px; }
-    .inv-meta-grid { font-size: 12px; text-align: left; margin-top: 4px; color: #0F172A; }
-    .inv-meta-grid strong { font-weight: 700; }
+    /* Centered Header Title */
+    .inv-type-title { 
+      font-size: 24px; 
+      font-weight: 800; 
+      color: var(--navy-primary); 
+      text-align: center; 
+      text-transform: uppercase; 
+      letter-spacing: 2px;
+      margin-bottom: 15px;
+    }
 
-    .inv-billed-box { background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px 14px; border-radius: 6px; margin-bottom: 18px; font-size: 12px; line-height: 1.5; }
-    .inv-billed-title { font-weight: 800; font-size: 11px; color: #475569; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+    /* Navy Box: Left = Billed To, Right = Invoice Meta */
+    .inv-billed-box { 
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      background: var(--navy-light-bg) !important; 
+      border: 1px solid var(--navy-border); 
+      padding: 14px 16px; 
+      border-radius: 6px; 
+      margin-bottom: 18px; 
+      font-size: 12px; 
+      line-height: 1.5; 
+    }
+    .inv-billed-left {
+      text-align: left;
+    }
+    .inv-billed-right {
+      text-align: right;
+    }
+    .inv-billed-title { 
+      font-weight: 800; 
+      font-size: 11px; 
+      color: var(--navy-primary); 
+      text-transform: uppercase; 
+      margin-bottom: 4px; 
+      letter-spacing: 0.5px; 
+    }
 
-    .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 12px; }
-    .inv-table th { background: #0F172A !important; color: #FFFFFF !important; font-weight: 700; text-transform: uppercase; font-size: 10.5px; padding: 9px 8px; text-align: left; letter-spacing: 0.3px; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-    .inv-table td { padding: 9px 8px; border-bottom: 1px solid #E2E8F0; vertical-align: top; }
+    /* Transparent Tables and Fills so Watermark shows */
+    .inv-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      margin-bottom: 18px; 
+      font-size: 12px; 
+      background: transparent !important;
+    }
+    .inv-table th { 
+      background: var(--navy-primary) !important; 
+      color: #FFFFFF !important; 
+      font-weight: 700; 
+      text-transform: uppercase; 
+      font-size: 10.5px; 
+      padding: 9px 8px; 
+      text-align: left; 
+      letter-spacing: 0.3px; 
+      -webkit-print-color-adjust: exact !important; 
+      print-color-adjust: exact !important; 
+    }
+    .inv-table td { 
+      padding: 9px 8px; 
+      border-bottom: 1px solid #CBD5E1; 
+      vertical-align: top; 
+      background: transparent !important;
+    }
+    .inv-table tr {
+      background: transparent !important;
+    }
     
+    .inv-shipment-details {
+      font-size: 12px;
+      border-bottom: 1px dashed #CBD5E1;
+      padding-bottom: 12px;
+      margin-bottom: 15px;
+      line-height: 1.6;
+      background: transparent !important;
+    }
+
     .inv-totals { text-align: right; font-size: 13px; margin-top: 12px; color: #0F172A; }
-    .inv-totals .grand-total { font-weight: 800; border-top: 2px solid #0F172A; border-bottom: 2px solid #0F172A; padding: 8px 0; font-size: 15px; margin-top: 6px; }
-    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 30px; font-size: 12px; }
+    .inv-totals .grand-total { 
+      font-weight: 800; 
+      border-top: 2px solid var(--navy-primary); 
+      border-bottom: 2px solid var(--navy-primary); 
+      padding: 8px 0; 
+      font-size: 15px; 
+      margin-top: 6px; 
+      color: var(--navy-primary);
+    }
     
+    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 35px; font-size: 12px; }
+    
+    .invoice-footer {
+      border-top: 2px solid var(--navy-primary);
+      padding-top: 10px;
+      margin-top: 40px;
+      text-align: center;
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
     .invoice-actions-bar {
       display: flex;
       gap: 10px;
@@ -246,7 +342,7 @@
         border: none !important; 
         width: 100% !important; 
         max-width: 680px !important; 
-        padding: 120px 15px 15px 15px !important; 
+        padding: 160px 15px 15px 15px !important; 
         color: #000000 !important; 
         margin: 0 auto !important; 
         border-radius: 0 !important; 
@@ -262,7 +358,7 @@
         visibility: visible !important;
       }
       .inv-table th {
-        background-color: #0F172A !important;
+        background-color: #1B365D !important;
         color: #FFFFFF !important;
       }
       .invoice-actions-bar { display: none !important; }
@@ -272,7 +368,7 @@
       header { flex-direction: column; align-items: flex-start; }
       .header-actions { width: 100%; justify-content: space-between; }
       body { padding: 10px; }
-      .invoice-wrapper { padding: 110px 15px 20px 15px; }
+      .invoice-wrapper { padding: 140px 15px 20px 15px; }
     }
   </style>
 </head>
@@ -804,24 +900,23 @@
       wrapper.innerHTML = `
         <img src="header.jpg" class="inv-header-bg" alt="">
         <div class="inv-content">
-          <div class="inv-header-flex">
-            <div>
-              <div class="inv-type-title">INVOICE</div>
-              <div class="inv-meta-grid">
-                <div>Invoice No: <strong>${finalInvNo}</strong></div>
-                <div>Date: <strong>${issueDateStr}</strong></div>
-              </div>
+          
+          <div class="inv-type-title">INVOICE</div>
+
+          <div class="inv-billed-box">
+            <div class="inv-billed-left">
+              <div class="inv-billed-title">BILLED TO:</div>
+              <strong>${t.billto}</strong><br>
+              TRN: ${t.trn || 'N/A'}<br>
+              ${t.address || ''}
+            </div>
+            <div class="inv-billed-right">
+              <div>Invoice No: <strong>${finalInvNo}</strong></div>
+              <div>Date: <strong>${issueDateStr}</strong></div>
             </div>
           </div>
 
-          <div class="inv-billed-box">
-            <div class="inv-billed-title">BILLED TO:</div>
-            <strong>${t.billto}</strong><br>
-            TRN: ${t.trn || 'N/A'}<br>
-            ${t.address || ''}
-          </div>
-
-          <div style="font-size:12px; border-bottom: 1px dashed #CBD5E1; padding-bottom:12px; margin-bottom:15px; line-height:1.6;">
+          <div class="inv-shipment-details">
             <strong>SHIPMENT & DELIVERY DETAILS</strong><br>
             Client Name: <strong>${t.client}</strong><br>
             Delivery Note #: ${t.dn || 'N/A'}<br>
@@ -871,6 +966,10 @@
               Signature & Company Stamp
             </div>
           </div>
+
+          <div class="invoice-footer">
+            <strong>LOAD LION TRANSPORT L.L.C</strong> | TRN: 104700974900003 | Al Quoz 3, Dubai, U.A.E
+          </div>
         </div>
       `;
     } else {
@@ -918,21 +1017,20 @@
       wrapper.innerHTML = `
         <img src="header.jpg" class="inv-header-bg" alt="">
         <div class="inv-content">
-          <div class="inv-header-flex">
-            <div>
-              <div class="inv-type-title">INVOICE</div>
-              <div class="inv-meta-grid">
-                <div>Invoice No: <strong>${finalInvNo}</strong></div>
-                <div>Date: <strong>${issueDateStr}</strong></div>
-              </div>
-            </div>
-          </div>
+          
+          <div class="inv-type-title">INVOICE</div>
 
           <div class="inv-billed-box">
-            <div class="inv-billed-title">BILLED TO:</div>
-            <strong>${baseTrip.billto}</strong><br>
-            TRN: ${baseTrip.trn || 'N/A'}<br>
-            ${baseTrip.address || ''}
+            <div class="inv-billed-left">
+              <div class="inv-billed-title">BILLED TO:</div>
+              <strong>${baseTrip.billto}</strong><br>
+              TRN: ${baseTrip.trn || 'N/A'}<br>
+              ${baseTrip.address || ''}
+            </div>
+            <div class="inv-billed-right">
+              <div>Invoice No: <strong>${finalInvNo}</strong></div>
+              <div>Date: <strong>${issueDateStr}</strong></div>
+            </div>
           </div>
 
           <table class="inv-table">
@@ -962,6 +1060,10 @@
               ___________________________<br>
               Signature & Company Stamp
             </div>
+          </div>
+
+          <div class="invoice-footer">
+            <strong>LOAD LION TRANSPORT L.L.C</strong> | TRN: 104700974900003 | Al Quoz 3, Dubai, U.A.E
           </div>
         </div>
       `;
