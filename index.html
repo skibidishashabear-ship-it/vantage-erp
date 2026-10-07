@@ -152,7 +152,7 @@
     .modal.active { display: flex; }
     .modal-card { background: white; border-radius: 12px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
     
-    /* Professional Executive Invoice Styling with Image Letterhead Background */
+    /* Professional Executive Invoice Styling with Background Graphics & Left Header */
     .invoice-wrapper { 
       background: #FFFFFF url('IMG-20261005-WA0009.jpg') no-repeat top center !important; 
       background-size: 100% auto !important;
@@ -166,17 +166,19 @@
       white-space: normal;
       box-shadow: 0 10px 30px rgba(0,0,0,0.12);
       border-radius: 8px;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
     }
-    .inv-header-flex { display: flex; justify-content: flex-end; align-items: flex-start; border-bottom: 2px solid #0F172A; padding-bottom: 14px; margin-bottom: 18px; }
-    .inv-type-title { font-size: 22px; font-weight: 800; color: #0F172A; text-align: right; text-transform: uppercase; letter-spacing: 1px; }
-    .inv-meta-grid { font-size: 12px; text-align: right; margin-top: 4px; color: #0F172A; }
+    .inv-header-flex { display: flex; justify-content: flex-start; align-items: flex-start; border-bottom: 2px solid #0F172A; padding-bottom: 14px; margin-bottom: 18px; }
+    .inv-type-title { font-size: 22px; font-weight: 800; color: #0F172A; text-align: left; text-transform: uppercase; letter-spacing: 1px; }
+    .inv-meta-grid { font-size: 12px; text-align: left; margin-top: 4px; color: #0F172A; }
     .inv-meta-grid strong { font-weight: 700; }
 
     .inv-billed-box { background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px 14px; border-radius: 6px; margin-bottom: 18px; font-size: 12px; line-height: 1.5; }
     .inv-billed-title { font-weight: 800; font-size: 11px; color: #475569; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
 
     .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 12px; }
-    .inv-table th { background: #0F172A !important; color: #FFFFFF !important; font-weight: 700; text-transform: uppercase; font-size: 10.5px; padding: 9px 8px; text-align: left; letter-spacing: 0.3px; }
+    .inv-table th { background: #0F172A !important; color: #FFFFFF !important; font-weight: 700; text-transform: uppercase; font-size: 10.5px; padding: 9px 8px; text-align: left; letter-spacing: 0.3px; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     .inv-table td { padding: 9px 8px; border-bottom: 1px solid #E2E8F0; vertical-align: top; }
     
     .inv-totals { text-align: right; font-size: 13px; margin-top: 12px; color: #0F172A; }
@@ -193,11 +195,15 @@
       margin-right: auto;
     }
 
-    /* Print Specific Centering & Layout Styles */
+    /* Print Specific Styles */
     @media print {
       @page {
         size: A4 portrait;
         margin: 5mm;
+      }
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
       }
       html, body {
         width: 100% !important;
@@ -239,6 +245,10 @@
         background-size: 100% auto !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+      }
+      .inv-table th {
+        background-color: #0F172A !important;
+        color: #FFFFFF !important;
       }
       .invoice-actions-bar { display: none !important; }
     }
