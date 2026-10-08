@@ -32,7 +32,6 @@
       
       /* Navy Theme Accent Colors */
       --navy-primary: #1B365D;
-      --navy-light-bg: rgba(240, 244, 248, 0.55);
       --navy-border: #CBD5E1;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
@@ -156,7 +155,7 @@
     .invoice-wrapper { 
       position: relative;
       background: #FFFFFF;
-      padding: 160px 30px 50px 30px; /* Pushed content lower down */
+      padding: 160px 30px 50px 30px; 
       width: 100%; 
       max-width: 680px; 
       min-height: 960px;
@@ -200,21 +199,20 @@
       text-align: center; 
       text-transform: uppercase; 
       letter-spacing: 2px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
     }
 
-    /* Navy Box: Left = Billed To, Right = Invoice Meta */
+    /* Option A: Minimalist Two-Column Clean Header Layout */
     .inv-billed-box { 
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      background: var(--navy-light-bg) !important; 
-      border: 1px solid var(--navy-border); 
-      padding: 14px 16px; 
-      border-radius: 6px; 
-      margin-bottom: 18px; 
-      font-size: 12px; 
+      padding: 0 4px;
+      margin-bottom: 22px; 
+      font-size: 13px; 
       line-height: 1.5; 
+      background: transparent !important;
+      border: none !important;
     }
     .inv-billed-left {
       text-align: left;
@@ -223,12 +221,12 @@
       text-align: right;
     }
     .inv-billed-title { 
-      font-weight: 800; 
+      font-weight: 700; 
       font-size: 11px; 
-      color: var(--navy-primary); 
+      color: var(--text-muted); 
       text-transform: uppercase; 
       margin-bottom: 4px; 
-      letter-spacing: 0.5px; 
+      letter-spacing: 0.8px; 
     }
 
     /* Transparent Tables and Fills so Watermark shows */
@@ -281,17 +279,7 @@
       color: var(--navy-primary);
     }
     
-    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 35px; font-size: 12px; }
-    
-    .invoice-footer {
-      border-top: 2px solid var(--navy-primary);
-      padding-top: 10px;
-      margin-top: 40px;
-      text-align: center;
-      font-size: 10px;
-      color: var(--text-muted);
-      line-height: 1.4;
-    }
+    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 45px; font-size: 12px; }
 
     .invoice-actions-bar {
       display: flex;
@@ -905,14 +893,14 @@
 
           <div class="inv-billed-box">
             <div class="inv-billed-left">
-              <div class="inv-billed-title">BILLED TO:</div>
-              <strong>${t.billto}</strong><br>
-              TRN: ${t.trn || 'N/A'}<br>
-              ${t.address || ''}
+              <div class="inv-billed-title">BILLED TO</div>
+              <strong style="font-size: 14px; color: #0F172A;">${t.billto}</strong><br>
+              <span style="color: #475569;">TRN: ${t.trn || 'N/A'}</span><br>
+              <span style="color: #475569;">${t.address || ''}</span>
             </div>
             <div class="inv-billed-right">
-              <div>Invoice No: <strong>${finalInvNo}</strong></div>
-              <div>Date: <strong>${issueDateStr}</strong></div>
+              <div><span style="color: #64748B;">Invoice No:</span> <strong style="color: #0F172A;">${finalInvNo}</strong></div>
+              <div><span style="color: #64748B;">Date:</span> <strong style="color: #0F172A;">${issueDateStr}</strong></div>
             </div>
           </div>
 
@@ -967,9 +955,6 @@
             </div>
           </div>
 
-          <div class="invoice-footer">
-            <strong>LOAD LION TRANSPORT L.L.C</strong> | TRN: 104700974900003 | Al Quoz 3, Dubai, U.A.E
-          </div>
         </div>
       `;
     } else {
@@ -998,7 +983,7 @@
         if (t.tollcost > 0) {
           tableRowsHtml += `
             <tr>
-              <td>${dateStr}</td>
+              <td></td>
               <td>
                 <strong>Toll Tax: ${t.tollname || 'Salik'}</strong><br>
                 <span style="font-size:11px; color:#475569;">Delivery Note #: ${t.dn || 'N/A'}</span><br>
@@ -1022,14 +1007,14 @@
 
           <div class="inv-billed-box">
             <div class="inv-billed-left">
-              <div class="inv-billed-title">BILLED TO:</div>
-              <strong>${baseTrip.billto}</strong><br>
-              TRN: ${baseTrip.trn || 'N/A'}<br>
-              ${baseTrip.address || ''}
+              <div class="inv-billed-title">BILLED TO</div>
+              <strong style="font-size: 14px; color: #0F172A;">${baseTrip.billto}</strong><br>
+              <span style="color: #475569;">TRN: ${baseTrip.trn || 'N/A'}</span><br>
+              <span style="color: #475569;">${baseTrip.address || ''}</span>
             </div>
             <div class="inv-billed-right">
-              <div>Invoice No: <strong>${finalInvNo}</strong></div>
-              <div>Date: <strong>${issueDateStr}</strong></div>
+              <div><span style="color: #64748B;">Invoice No:</span> <strong style="color: #0F172A;">${finalInvNo}</strong></div>
+              <div><span style="color: #64748B;">Date:</span> <strong style="color: #0F172A;">${issueDateStr}</strong></div>
             </div>
           </div>
 
@@ -1062,9 +1047,6 @@
             </div>
           </div>
 
-          <div class="invoice-footer">
-            <strong>LOAD LION TRANSPORT L.L.C</strong> | TRN: 104700974900003 | Al Quoz 3, Dubai, U.A.E
-          </div>
         </div>
       `;
     }
