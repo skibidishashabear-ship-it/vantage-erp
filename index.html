@@ -155,7 +155,7 @@
     .invoice-wrapper { 
       position: relative;
       background: #FFFFFF;
-      padding: 160px 30px 50px 30px; 
+      padding: 160px 30px 40px 30px; 
       width: 100%; 
       max-width: 680px; 
       min-height: 960px;
@@ -167,6 +167,8 @@
       box-shadow: 0 10px 30px rgba(0,0,0,0.12);
       border-radius: 8px;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
@@ -188,6 +190,7 @@
       z-index: 1;
       display: flex;
       flex-direction: column;
+      flex: 1 0 auto;
       min-height: 100%;
     }
 
@@ -202,7 +205,7 @@
       margin-bottom: 20px;
     }
 
-    /* Option A: Minimalist Two-Column Clean Header Layout */
+    /* Minimalist Two-Column Clean Header Layout */
     .inv-billed-box { 
       display: flex;
       justify-content: space-between;
@@ -279,7 +282,17 @@
       color: var(--navy-primary);
     }
     
-    .stamp-container { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 45px; font-size: 12px; }
+    /* Load Lion Footer Details & Stamp Container */
+    .stamp-container { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: flex-end; 
+      margin-top: auto; 
+      padding-top: 30px;
+      font-size: 12px; 
+      page-break-after: avoid;
+      break-after: avoid;
+    }
 
     .invoice-actions-bar {
       display: flex;
@@ -295,7 +308,7 @@
     @media print {
       @page {
         size: A4 portrait;
-        margin: 5mm;
+        margin: 0mm;
       }
       * {
         -webkit-print-color-adjust: exact !important;
@@ -303,7 +316,7 @@
       }
       html, body {
         width: 100% !important;
-        height: auto !important;
+        height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
@@ -316,7 +329,7 @@
         left: 0 !important; 
         top: 0 !important; 
         width: 100% !important; 
-        height: auto !important; 
+        height: 100% !important; 
         padding: 0 !important; 
         background: #ffffff !important; 
         display: block !important; 
@@ -324,13 +337,16 @@
       #invoiceModal > div {
         max-width: 100% !important;
         width: 100% !important;
+        height: 100% !important;
         padding: 0 !important;
       }
       .invoice-wrapper { 
         border: none !important; 
         width: 100% !important; 
-        max-width: 680px !important; 
-        padding: 160px 15px 15px 15px !important; 
+        max-width: 100% !important; 
+        min-height: 297mm !important;
+        height: 297mm !important;
+        padding: 160px 30px 40px 30px !important; 
         color: #000000 !important; 
         margin: 0 auto !important; 
         border-radius: 0 !important; 
@@ -338,6 +354,9 @@
         page-break-inside: avoid !important;
         break-inside: avoid !important;
         background: #FFFFFF !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
@@ -348,6 +367,10 @@
       .inv-table th {
         background-color: #1B365D !important;
         color: #FFFFFF !important;
+      }
+      .stamp-container {
+        margin-top: auto !important;
+        padding-bottom: 10px !important;
       }
       .invoice-actions-bar { display: none !important; }
     }
