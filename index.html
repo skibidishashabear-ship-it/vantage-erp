@@ -190,7 +190,6 @@
       flex-direction: column;
     }
 
-    /* Centered Header Title */
     .inv-type-title { 
       font-size: 24px; 
       font-weight: 800; 
@@ -201,7 +200,6 @@
       margin-bottom: 20px;
     }
 
-    /* Minimalist Two-Column Clean Header Layout */
     .inv-billed-box { 
       display: flex;
       justify-content: space-between;
@@ -213,12 +211,8 @@
       background: transparent !important;
       border: none !important;
     }
-    .inv-billed-left {
-      text-align: left;
-    }
-    .inv-billed-right {
-      text-align: right;
-    }
+    .inv-billed-left { text-align: left; }
+    .inv-billed-right { text-align: right; }
     .inv-billed-title { 
       font-weight: 700; 
       font-size: 11px; 
@@ -228,7 +222,6 @@
       letter-spacing: 0.8px; 
     }
 
-    /* Transparent Tables and Fills so Watermark shows */
     .inv-table { 
       width: 100%; 
       border-collapse: collapse; 
@@ -254,9 +247,7 @@
       vertical-align: top; 
       background: transparent !important;
     }
-    .inv-table tr {
-      background: transparent !important;
-    }
+    .inv-table tr { background: transparent !important; }
     
     .inv-shipment-details {
       font-size: 12px;
@@ -278,7 +269,6 @@
       color: var(--navy-primary);
     }
     
-    /* Load Lion Footer Details & Stamp Container */
     .stamp-container { 
       display: flex; 
       justify-content: space-between; 
@@ -300,71 +290,18 @@
       margin-right: auto;
     }
 
-    /* Print Specific Styles */
     @media print {
-      @page {
-        size: A4 portrait;
-        margin: 0mm;
-      }
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-      html, body {
-        width: 100% !important;
-        height: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #ffffff !important;
-        overflow: visible !important;
-      }
+      @page { size: A4 portrait; margin: 0mm; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      html, body { width: 100% !important; height: 100% !important; margin: 0 !important; padding: 0 !important; background: #ffffff !important; overflow: visible !important; }
       body * { visibility: hidden !important; background: transparent !important; box-shadow: none !important; }
       #invoiceModal, #invoiceModal * { visibility: visible !important; }
-      #invoiceModal { 
-        position: absolute !important; 
-        left: 0 !important; 
-        top: 0 !important; 
-        width: 100% !important; 
-        height: 100% !important; 
-        padding: 0 !important; 
-        background: #ffffff !important; 
-        display: block !important; 
-      }
-      #invoiceModal > div {
-        max-width: 100% !important;
-        width: 100% !important;
-        padding: 0 !important;
-      }
-      .invoice-wrapper { 
-        border: none !important; 
-        width: 100% !important; 
-        max-width: 100% !important; 
-        min-height: 297mm !important;
-        padding: 160px 30px 40px 30px !important; 
-        color: #000000 !important; 
-        margin: 0 auto !important; 
-        border-radius: 0 !important; 
-        box-shadow: none !important; 
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        background: #FFFFFF !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-      }
-      .inv-header-bg {
-        display: block !important;
-        visibility: visible !important;
-      }
-      .inv-table th {
-        background-color: #1B365D !important;
-        color: #FFFFFF !important;
-      }
-      .stamp-container {
-        margin-top: 35px !important;
-        padding-bottom: 0 !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-      }
+      #invoiceModal { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; padding: 0 !important; background: #ffffff !important; display: block !important; }
+      #invoiceModal > div { max-width: 100% !important; width: 100% !important; padding: 0 !important; }
+      .invoice-wrapper { border: none !important; width: 100% !important; max-width: 100% !important; min-height: 297mm !important; padding: 160px 30px 40px 30px !important; color: #000000 !important; margin: 0 auto !important; border-radius: 0 !important; box-shadow: none !important; page-break-inside: avoid !important; break-inside: avoid !important; background: #FFFFFF !important; }
+      .inv-header-bg { display: block !important; visibility: visible !important; }
+      .inv-table th { background-color: #1B365D !important; color: #FFFFFF !important; }
+      .stamp-container { margin-top: 35px !important; padding-bottom: 0 !important; page-break-inside: avoid !important; break-inside: avoid !important; }
       .invoice-actions-bar { display: none !important; }
     }
     
@@ -545,18 +482,22 @@
         <tbody id="tripsBody"></tbody>
       </table>
     </div>
+
+    <!-- Pagination Controls -->
+    <div id="paginationControls" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 10px 0;">
+      <button class="outline" id="prevPageBtn" onclick="prevPage()" style="display:none;">Previous Page</button>
+      <span id="pageIndicator" style="font-size: 0.9rem; color: var(--text-muted); font-weight: bold;">Page 1</span>
+      <button class="outline" id="nextPageBtn" onclick="nextPage()" style="display:none;">Next Page</button>
+    </div>
   </div>
 
   <div class="modal" id="invoiceModal">
     <div style="width: 100%; max-width: 680px; padding: 10px 0;">
-      
       <div class="invoice-wrapper" id="printableInvoice"></div>
-
       <div class="invoice-actions-bar">
         <button class="outline" onclick="closeInvoice()" style="background:white; padding: 10px 20px; min-height: 42px;">Close</button>
         <button onclick="printInvoice()" style="padding: 10px 20px; min-height: 42px;">Print PDF Invoice</button>
       </div>
-
     </div>
   </div>
 
@@ -578,6 +519,12 @@
   let localData = { trips: [] };
   let chartInstance = null;
   let currentUser = localStorage.getItem('vantage_active_user') || null;
+
+  // Pagination Variables
+  let lastVisibleDoc = null;
+  let pageHistory = [];
+  let currentPage = 1;
+  const PAGE_SIZE = 20;
 
   const DEFAULT_ACCOUNTS = {
     "Administrator": "administrator",
@@ -645,6 +592,7 @@
         loginModal.classList.remove('active');
         appContent.style.display = 'block';
         updateUserUI();
+        loadTripsPage('initial');
       } else {
         loginModal.classList.add('active');
         appContent.style.display = 'none';
@@ -690,16 +638,79 @@
     if (issueDateInput) issueDateInput.value = today;
   }
 
-  db.collection("trips").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-    localData.trips = [];
-    snapshot.forEach((doc) => {
-      localData.trips.push({ id: doc.id, ...doc.data() });
+  function loadTripsPage(direction = 'initial') {
+    const loader = document.getElementById('loadingBar');
+    if (loader) loader.style.display = 'block';
+
+    let query = db.collection("trips").orderBy("timestamp", "desc").limit(PAGE_SIZE);
+
+    if (direction === 'next' && lastVisibleDoc) {
+      query = query.startAfter(lastVisibleDoc);
+    } else if (direction === 'prev' && pageHistory.length > 0) {
+      pageHistory.pop();
+      const prevDoc = pageHistory[pageHistory.length - 1];
+      if (prevDoc) {
+        query = db.collection("trips").orderBy("timestamp", "desc").startAfter(prevDoc).limit(PAGE_SIZE);
+      }
+    } else if (direction === 'initial') {
+      currentPage = 1;
+      pageHistory = [];
+    }
+
+    query.get().then((snapshot) => {
+      if (snapshot.empty && direction !== 'initial') {
+        if (loader) loader.style.display = 'none';
+        return;
+      }
+
+      localData.trips = [];
+      snapshot.forEach((doc) => {
+        localData.trips.push({ id: doc.id, ...doc.data() });
+      });
+
+      if (!snapshot.empty) {
+        lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+        if (direction === 'next' && !pageHistory.includes(snapshot.docs[0])) {
+          pageHistory.push(snapshot.docs[0]);
+        } else if (direction === 'initial' && snapshot.docs.length > 0) {
+          pageHistory.push(snapshot.docs[0]);
+        }
+      }
+
+      renderTrips();
+      updateDashboard();
+      renderPaginationControls(snapshot.size);
+
+      if (loader) loader.style.display = 'none';
+    }).catch((error) => {
+      console.error("Firestore Pagination Error: ", error);
+      if (loader) loader.style.display = 'none';
     });
-    renderTrips();
-    updateDashboard();
-  }, (error) => {
-    console.error("Firestore Error: ", error);
-  });
+  }
+
+  function nextPage() {
+    currentPage++;
+    loadTripsPage('next');
+  }
+
+  function prevPage() {
+    if (currentPage > 1) {
+      currentPage--;
+      loadTripsPage('prev');
+    }
+  }
+
+  function renderPaginationControls(fetchedCount) {
+    const prevBtn = document.getElementById('prevPageBtn');
+    const nextBtn = document.getElementById('nextPageBtn');
+    const pageIndicator = document.getElementById('pageIndicator');
+
+    if (pageIndicator) pageIndicator.innerText = `Page ${currentPage}`;
+    if (prevBtn) prevBtn.style.display = currentPage > 1 ? 'inline-flex' : 'none';
+    if (nextBtn) {
+      nextBtn.style.display = (fetchedCount === PAGE_SIZE) ? 'inline-flex' : 'none';
+    }
+  }
 
   async function addTrip(e) {
     e.preventDefault();
@@ -738,6 +749,7 @@
       await db.collection("trips").add(trip);
       e.target.reset();
       setToday();
+      loadTripsPage('initial');
     } catch (err) {
       alert("Error adding trip: " + err.message);
     } finally {
@@ -856,6 +868,7 @@
 
     try {
       await db.collection("trips").doc(id).update(updatedTrip);
+      loadTripsPage('initial');
     } catch (err) {
       alert("Error updating record: " + err.message);
     }
@@ -865,6 +878,7 @@
     if (confirm('Delete this trip record?')) {
       try {
         await db.collection("trips").doc(id).delete();
+        loadTripsPage('initial');
       } catch (err) {
         alert("Error deleting record: " + err.message);
       }
