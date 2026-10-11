@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Vantage Utilities - Fleet & Expenses</title>
   <!-- Firebase Compatibility SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -19,30 +19,36 @@
       --danger: #EF4444;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
-    body { background-color: var(--bg); color: var(--text); padding: 20px; }
+    body { background-color: var(--bg); color: var(--text); padding: 15px; -webkit-tap-highlight-color: transparent; }
     
     header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
-    .brand { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
-    .nav-links { display: flex; justify-content: center; gap: 10px; }
-    .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: bold; padding: 8px 16px; border-radius: 6px; }
+    .brand { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+    .nav-links { display: flex; justify-content: center; gap: 8px; }
+    .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: bold; padding: 10px 14px; border-radius: 6px; font-size: 0.9rem; }
     .nav-links a.active { background: var(--accent-light); color: var(--accent); }
     .nav-links a:hover { background: var(--border); }
     
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px; }
-    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.05); }
-    .card h3 { color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.05); }
+    .card h3 { color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
     
-    button { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    button { background: var(--accent); color: white; border: none; padding: 12px 18px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.95rem; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
     button.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
     button.danger { background: var(--danger); }
-    input, select { padding: 8px; border: 1px solid var(--border); border-radius: 5px; width: 100%; margin-bottom: 10px; }
-    label { font-size: 0.85rem; font-weight: bold; color: var(--text-muted); }
+    input, select { padding: 12px; border: 1px solid var(--border); border-radius: 6px; width: 100%; margin-bottom: 12px; font-size: 1rem; min-height: 44px; background: var(--bg); color: var(--text); }
+    label { font-size: 0.8rem; font-weight: bold; color: var(--text-muted); display: block; margin-bottom: 4px; }
     
-    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin-top: 15px; }
-    th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 15px; white-space: nowrap; }
+    th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
     th { background: var(--accent-light); color: var(--accent); }
     
-    .result-box { background: var(--accent-light); border: 1px solid var(--accent); padding: 15px; border-radius: 5px; margin-top: 15px; font-size: 1.2rem; font-weight: bold; text-align: center; }
+    .result-box { background: var(--accent-light); border: 1px solid var(--accent); padding: 15px; border-radius: 6px; margin-top: 15px; font-size: 1.2rem; font-weight: bold; text-align: center; color: var(--accent); }
+
+    @media (max-width: 600px) {
+      header { grid-template-columns: 1fr; gap: 10px; text-align: center; }
+      .nav-links { justify-content: center; }
+    }
   </style>
 </head>
 <body>
@@ -68,13 +74,13 @@
       </select>
       
       <label id="lbl-dist">Distance</label>
-      <input type="number" id="calc-dist" placeholder="e.g. 150" step="any" oninput="calculateFuel()">
+      <input type="number" id="calc-dist" placeholder="e.g. 150" step="any" inputmode="decimal" oninput="calculateFuel()">
       
       <label id="lbl-eff">Fuel Efficiency</label>
-      <input type="number" id="calc-eff" placeholder="e.g. 8" step="any" oninput="calculateFuel()">
+      <input type="number" id="calc-eff" placeholder="e.g. 8" step="any" inputmode="decimal" oninput="calculateFuel()">
       
       <label id="lbl-price">Fuel Price per Unit (AED)</label>
-      <input type="number" id="calc-price" value="11.50" step="any" oninput="calculateFuel()">
+      <input type="number" id="calc-price" value="11.50" step="any" inputmode="decimal" oninput="calculateFuel()">
     </div>
     <div class="result-box">
       Estimated Cost: <span id="calc-result">0.00</span> AED
@@ -95,10 +101,10 @@
         <option>Miscellaneous</option>
       </select>
       <label>Description</label>
-      <input type="text" id="e-desc" placeholder="e.g. Oil change for 85017-J" required>
+      <input type="text" id="e-desc" placeholder="e.g. Oil change for 85017-J" inputmode="text" required>
       <label>Amount (AED)</label>
-      <input type="number" id="e-amount" step="any" required>
-      <button type="submit">➕ Log Expense</button>
+      <input type="number" id="e-amount" step="any" inputmode="decimal" required>
+      <button type="submit" style="width:100%;">➕ Log Expense</button>
     </form>
   </div>
 </div>
@@ -106,18 +112,20 @@
 <!-- Expense History Table -->
 <div class="card" style="margin-bottom: 20px;">
   <h3>Expense History Log</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Category</th>
-        <th>Description</th>
-        <th>Amount (AED)</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="expensesBody"></tbody>
-  </table>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Category</th>
+          <th>Description</th>
+          <th>Amount (AED)</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="expensesBody"></tbody>
+    </table>
+  </div>
 
   <!-- Expenses Pagination Controls -->
   <div id="expensePagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 5px 0;">
@@ -130,25 +138,27 @@
 <!-- Maintenance Log -->
 <div class="card">
   <h3>Fleet Maintenance & Renewals</h3>
-  <form onsubmit="addMaintenance(event)" style="display: flex; gap: 10px; align-items: flex-end; margin-bottom: 15px;">
-    <div style="flex: 1;"><label>Plate No.</label><input type="text" id="m-plate" required></div>
-    <div style="flex: 2;"><label>Service / Renewal Type</label><input type="text" id="m-type" placeholder="e.g. Mulkiya Renewal" required></div>
-    <div style="flex: 1;"><label>Next Due Date</label><input type="date" id="m-due" required></div>
+  <form onsubmit="addMaintenance(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; align-items: flex-end; margin-bottom: 15px;">
+    <div><label>Plate No.</label><input type="text" id="m-plate" placeholder="e.g. 85017-J" inputmode="text" autocapitalize="characters" required></div>
+    <div><label>Service / Renewal Type</label><input type="text" id="m-type" placeholder="e.g. Mulkiya Renewal" inputmode="text" required></div>
+    <div><label>Next Due Date</label><input type="date" id="m-due" required></div>
     <button type="submit">➕ Add Record</button>
   </form>
   
-  <table>
-    <thead>
-      <tr>
-        <th>Plate No.</th>
-        <th>Service/Renewal</th>
-        <th>Next Due Date</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="maintenanceBody"></tbody>
-  </table>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Plate No.</th>
+          <th>Service/Renewal</th>
+          <th>Next Due Date</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="maintenanceBody"></tbody>
+    </table>
+  </div>
 
   <!-- Maintenance Pagination Controls -->
   <div id="maintPagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 5px 0;">
@@ -174,7 +184,6 @@
   let expensesData = [];
   let maintenanceData = [];
 
-  // Pagination states
   let lastExpDoc = null;
   let expHistory = [];
   let expCurrentPage = 1;
@@ -207,7 +216,6 @@
     }
   }
 
-  // --- EXPENSES FIREBASE & PAGINATION ---
   async function addExpense(e) {
     e.preventDefault();
     const expense = {
@@ -308,13 +316,12 @@
           <td><strong>${x.category}</strong></td>
           <td>${x.desc}</td>
           <td><strong>${(x.amount || 0).toFixed(2)} AED</strong></td>
-          <td><button class="danger" style="padding: 4px 8px;" onclick="deleteExpense('${x.id}')">Delete</button></td>
+          <td><button class="danger" style="padding: 4px 8px; min-height: 32px;" onclick="deleteExpense('${x.id}')">Delete</button></td>
         </tr>
       `;
     });
   }
 
-  // --- MAINTENANCE FIREBASE & PAGINATION ---
   async function addMaintenance(e) {
     e.preventDefault();
     const record = {
@@ -423,7 +430,7 @@
           <td>${m.type}</td>
           <td>${formattedDue}</td>
           <td>${statusHtml}</td>
-          <td><button class="danger" style="padding: 4px 8px;" onclick="deleteMaintenance('${m.id}')">Delete</button></td>
+          <td><button class="danger" style="padding: 4px 8px; min-height: 32px;" onclick="deleteMaintenance('${m.id}')">Delete</button></td>
         </tr>
       `;
     });
