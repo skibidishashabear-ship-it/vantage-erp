@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vantage Utilities - Fleet & Expenses</title>
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <style>
     :root {
       --bg: #F8FAFC;
@@ -18,7 +21,6 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
     body { background-color: var(--bg); color: var(--text); padding: 20px; }
     
-    /* Centered Header Grid Layout */
     header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; }
     .brand { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
     .nav-links { display: flex; justify-content: center; gap: 10px; }
@@ -31,6 +33,7 @@
     .card h3 { color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
     
     button { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    button.outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
     button.danger { background: var(--danger); }
     input, select { padding: 8px; border: 1px solid var(--border); border-radius: 5px; width: 100%; margin-bottom: 10px; }
     label { font-size: 0.85rem; font-weight: bold; color: var(--text-muted); }
@@ -115,6 +118,13 @@
     </thead>
     <tbody id="expensesBody"></tbody>
   </table>
+
+  <!-- Expenses Pagination Controls -->
+  <div id="expensePagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 5px 0;">
+    <button class="outline" id="prevExpBtn" onclick="prevExpensePage()" style="display:none;">Previous Page</button>
+    <span id="expPageIndicator" style="font-size: 0.9rem; color: var(--text-muted); font-weight: bold;">Page 1</span>
+    <button class="outline" id="nextExpBtn" onclick="nextExpensePage()" style="display:none;">Next Page</button>
+  </div>
 </div>
 
 <!-- Maintenance Log -->
@@ -139,15 +149,42 @@
     </thead>
     <tbody id="maintenanceBody"></tbody>
   </table>
+
+  <!-- Maintenance Pagination Controls -->
+  <div id="maintPagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 5px 0;">
+    <button class="outline" id="prevMaintBtn" onclick="prevMaintPage()" style="display:none;">Previous Page</button>
+    <span id="maintPageIndicator" style="font-size: 0.9rem; color: var(--text-muted); font-weight: bold;">Page 1</span>
+    <button class="outline" id="nextMaintBtn" onclick="nextMaintPage()" style="display:none;">Next Page</button>
+  </div>
 </div>
 
 <script>
-  let db = JSON.parse(localStorage.getItem('vantage_db')) || { trips: [], invoiceCounter: 0, expenses: [], maintenance: [] };
-  
-  if(!db.expenses) db.expenses = [];
-  if(!db.maintenance) db.maintenance = [];
+  const firebaseConfig = {
+    apiKey: "AIzaSyDfYzDRXRd8DD7bPPznLqEsjn6shn1Obvc",
+    authDomain: "vantage-erp.firebaseapp.com",
+    projectId: "vantage-erp",
+    storageBucket: "vantage-erp.firebasestorage.app",
+    messagingSenderId: "291156677597",
+    appId: "1:291156677597:web:5680c5db276e7e3d9b5c34"
+  };
 
-  function saveDB() { localStorage.setItem('vantage_db', JSON.stringify(db)); renderExpenses(); renderMaintenance(); }
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  let expensesData = [];
+  let maintenanceData = [];
+
+  // Pagination states
+  let lastExpDoc = null;
+  let expHistory = [];
+  let expCurrentPage = 1;
+
+  let lastMaintDoc = null;
+  let maintHistory = [];
+  let maintCurrentPage = 1;
+
+  const PAGE_SIZE = 20;
+
   document.getElementById('e-date').value = new Date().toISOString().split('T')[0];
 
   function updateCalcLabels() {
@@ -170,53 +207,199 @@
     }
   }
 
-  function addExpense(e) {
+  // --- EXPENSES FIREBASE & PAGINATION ---
+  async function addExpense(e) {
     e.preventDefault();
-    db.expenses.push({
-      id: Date.now(),
+    const expense = {
+      timestamp: Date.now(),
       date: document.getElementById('e-date').value,
       category: document.getElementById('e-cat').value,
       desc: document.getElementById('e-desc').value,
-      amount: parseFloat(document.getElementById('e-amount').value)
-    });
-    saveDB(); e.target.reset(); document.getElementById('e-date').value = new Date().toISOString().split('T')[0];
+      amount: parseFloat(document.getElementById('e-amount').value) || 0
+    };
+
+    try {
+      await db.collection("expenses").add(expense);
+      e.target.reset();
+      document.getElementById('e-date').value = new Date().toISOString().split('T')[0];
+      loadExpensesPage('initial');
+    } catch (err) {
+      alert("Error adding expense: " + err.message);
+    }
   }
 
-  function deleteExpense(id) {
-    db.expenses = db.expenses.filter(x => x.id !== id);
-    saveDB();
+  async function deleteExpense(id) {
+    if (confirm('Delete this expense record?')) {
+      try {
+        await db.collection("expenses").doc(id).delete();
+        loadExpensesPage('initial');
+      } catch (err) {
+        alert("Error deleting expense: " + err.message);
+      }
+    }
+  }
+
+  function loadExpensesPage(direction = 'initial') {
+    let query = db.collection("expenses").orderBy("timestamp", "desc").limit(PAGE_SIZE);
+
+    if (direction === 'next' && lastExpDoc) {
+      query = query.startAfter(lastExpDoc);
+    } else if (direction === 'prev' && expHistory.length > 0) {
+      expHistory.pop();
+      const prevDoc = expHistory[expHistory.length - 1];
+      if (prevDoc) {
+        query = db.collection("expenses").orderBy("timestamp", "desc").startAfter(prevDoc).limit(PAGE_SIZE);
+      }
+    } else if (direction === 'initial') {
+      expCurrentPage = 1;
+      expHistory = [];
+    }
+
+    query.get().then((snapshot) => {
+      expensesData = [];
+      snapshot.forEach((doc) => {
+        expensesData.push({ id: doc.id, ...doc.data() });
+      });
+
+      if (!snapshot.empty) {
+        lastExpDoc = snapshot.docs[snapshot.docs.length - 1];
+        if (direction === 'next' && !expHistory.includes(snapshot.docs[0])) {
+          expHistory.push(snapshot.docs[0]);
+        } else if (direction === 'initial' && snapshot.docs.length > 0) {
+          expHistory.push(snapshot.docs[0]);
+        }
+      }
+
+      renderExpenses();
+      renderExpControls(snapshot.size);
+    }).catch(err => console.error("Error loading expenses:", err));
+  }
+
+  function nextExpensePage() {
+    expCurrentPage++;
+    loadExpensesPage('next');
+  }
+
+  function prevExpensePage() {
+    if (expCurrentPage > 1) {
+      expCurrentPage--;
+      loadExpensesPage('prev');
+    }
+  }
+
+  function renderExpControls(fetchedCount) {
+    const prevBtn = document.getElementById('prevExpBtn');
+    const nextBtn = document.getElementById('nextExpBtn');
+    const indicator = document.getElementById('expPageIndicator');
+
+    if (indicator) indicator.innerText = `Page ${expCurrentPage}`;
+    if (prevBtn) prevBtn.style.display = expCurrentPage > 1 ? 'inline-flex' : 'none';
+    if (nextBtn) nextBtn.style.display = (fetchedCount === PAGE_SIZE) ? 'inline-flex' : 'none';
   }
 
   function renderExpenses() {
     const tbody = document.getElementById('expensesBody');
     tbody.innerHTML = '';
-    db.expenses.forEach(x => {
+    expensesData.forEach(x => {
+      const formattedDate = x.date ? x.date.split('-').reverse().join('/') : 'N/A';
       tbody.innerHTML += `
         <tr>
-          <td>${x.date.split('-').reverse().join('/')}</td>
+          <td>${formattedDate}</td>
           <td><strong>${x.category}</strong></td>
           <td>${x.desc}</td>
-          <td><strong>${x.amount.toFixed(2)} AED</strong></td>
-          <td><button class="danger" style="padding: 4px 8px;" onclick="deleteExpense(${x.id})">Delete</button></td>
+          <td><strong>${(x.amount || 0).toFixed(2)} AED</strong></td>
+          <td><button class="danger" style="padding: 4px 8px;" onclick="deleteExpense('${x.id}')">Delete</button></td>
         </tr>
       `;
     });
   }
 
-  function addMaintenance(e) {
+  // --- MAINTENANCE FIREBASE & PAGINATION ---
+  async function addMaintenance(e) {
     e.preventDefault();
-    db.maintenance.push({
-      id: Date.now(),
+    const record = {
+      timestamp: Date.now(),
       plate: document.getElementById('m-plate').value,
       type: document.getElementById('m-type').value,
       due: document.getElementById('m-due').value
-    });
-    saveDB(); e.target.reset();
+    };
+
+    try {
+      await db.collection("maintenance").add(record);
+      e.target.reset();
+      loadMaintenancePage('initial');
+    } catch (err) {
+      alert("Error adding maintenance record: " + err.message);
+    }
   }
 
-  function deleteMaintenance(id) {
-    db.maintenance = db.maintenance.filter(m => m.id !== id);
-    saveDB();
+  async function deleteMaintenance(id) {
+    if (confirm('Delete this maintenance record?')) {
+      try {
+        await db.collection("maintenance").doc(id).delete();
+        loadMaintenancePage('initial');
+      } catch (err) {
+        alert("Error deleting maintenance: " + err.message);
+      }
+    }
+  }
+
+  function loadMaintenancePage(direction = 'initial') {
+    let query = db.collection("maintenance").orderBy("timestamp", "desc").limit(PAGE_SIZE);
+
+    if (direction === 'next' && lastMaintDoc) {
+      query = query.startAfter(lastMaintDoc);
+    } else if (direction === 'prev' && maintHistory.length > 0) {
+      maintHistory.pop();
+      const prevDoc = maintHistory[maintHistory.length - 1];
+      if (prevDoc) {
+        query = db.collection("maintenance").orderBy("timestamp", "desc").startAfter(prevDoc).limit(PAGE_SIZE);
+      }
+    } else if (direction === 'initial') {
+      maintCurrentPage = 1;
+      maintHistory = [];
+    }
+
+    query.get().then((snapshot) => {
+      maintenanceData = [];
+      snapshot.forEach((doc) => {
+        maintenanceData.push({ id: doc.id, ...doc.data() });
+      });
+
+      if (!snapshot.empty) {
+        lastMaintDoc = snapshot.docs[snapshot.docs.length - 1];
+        if (direction === 'next' && !maintHistory.includes(snapshot.docs[0])) {
+          maintHistory.push(snapshot.docs[0]);
+        } else if (direction === 'initial' && snapshot.docs.length > 0) {
+          maintHistory.push(snapshot.docs[0]);
+        }
+      }
+
+      renderMaintenance();
+      renderMaintControls(snapshot.size);
+    }).catch(err => console.error("Error loading maintenance:", err));
+  }
+
+  function nextMaintPage() {
+    maintCurrentPage++;
+    loadMaintenancePage('next');
+  }
+
+  function prevMaintPage() {
+    if (maintCurrentPage > 1) {
+      maintCurrentPage--;
+      loadMaintenancePage('prev');
+    }
+  }
+
+  function renderMaintControls(fetchedCount) {
+    const prevBtn = document.getElementById('prevMaintBtn');
+    const nextBtn = document.getElementById('nextMaintBtn');
+    const indicator = document.getElementById('maintPageIndicator');
+
+    if (indicator) indicator.innerText = `Page ${maintCurrentPage}`;
+    if (prevBtn) prevBtn.style.display = maintCurrentPage > 1 ? 'inline-flex' : 'none';
+    if (nextBtn) nextBtn.style.display = (fetchedCount === PAGE_SIZE) ? 'inline-flex' : 'none';
   }
 
   function renderMaintenance() {
@@ -224,7 +407,7 @@
     tbody.innerHTML = '';
     const today = new Date();
     
-    db.maintenance.sort((a, b) => new Date(a.due) - new Date(b.due)).forEach(m => {
+    maintenanceData.forEach(m => {
       const dueDate = new Date(m.due);
       const diffTime = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
       
@@ -232,21 +415,23 @@
       if (diffTime <= 7 && diffTime >= 0) statusHtml = `<span style="color:#F59E0B; font-weight:bold;">Due Soon (${diffTime} days)</span>`;
       if (diffTime < 0) statusHtml = `<span style="color:var(--danger); font-weight:bold;">OVERDUE by ${Math.abs(diffTime)} days</span>`;
 
+      const formattedDue = m.due ? m.due.split('-').reverse().join('/') : 'N/A';
+
       tbody.innerHTML += `
         <tr>
           <td><strong>${m.plate}</strong></td>
           <td>${m.type}</td>
-          <td>${m.due.split('-').reverse().join('/')}</td>
+          <td>${formattedDue}</td>
           <td>${statusHtml}</td>
-          <td><button class="danger" style="padding: 4px 8px;" onclick="deleteMaintenance(${m.id})">Delete</button></td>
+          <td><button class="danger" style="padding: 4px 8px;" onclick="deleteMaintenance('${m.id}')">Delete</button></td>
         </tr>
       `;
     });
   }
 
   updateCalcLabels();
-  renderExpenses();
-  renderMaintenance();
+  loadExpensesPage('initial');
+  loadMaintenancePage('initial');
 </script>
 </body>
 </html>
