@@ -358,7 +358,7 @@
       
       <div style="margin-bottom:10px;">
         <label>Account Name</label>
-        <input type="text" id="adminNewName" placeholder="Full Name">
+        <input type="text" id="adminNewName" placeholder="Full Name" inputmode="text">
       </div>
       <div style="margin-bottom:15px;">
         <label>Password</label>
@@ -436,24 +436,24 @@
       <div class="form-row">
         <div><label>Delivery Date</label><input type="date" id="t-date" required></div>
         <div><label>Invoice / Log Issue Date</label><input type="date" id="t-issuedate" required></div>
-        <div><label>Bill To</label><input type="text" id="t-billto" placeholder="e.g. TurboTix Logistics L.L.C" required></div>
-        <div><label>Partner TRN</label><input type="text" id="t-trn" placeholder="e.g. 104700974900003"></div>
+        <div><label>Bill To</label><input type="text" id="t-billto" placeholder="e.g. TurboTix Logistics L.L.C" inputmode="text" required></div>
+        <div><label>Partner TRN</label><input type="text" id="t-trn" placeholder="e.g. 104700974900003" inputmode="numeric"></div>
       </div>
       <div class="form-row">
-        <div><label>Partner Address</label><input type="text" id="t-address" placeholder="e.g. B10289, Al Quoz 3, Dubai"></div>
-        <div><label>End Client Name</label><input type="text" id="t-client" placeholder="e.g. Arab and India Spices FZC" required></div>
-        <div><label>Delivery Note #</label><input type="text" id="t-dn" placeholder="e.g. WB1-82546"></div>
-        <div><label>Vehicle Plate No.</label><input type="text" id="t-plate" placeholder="e.g. 85017-J" required></div>
+        <div><label>Partner Address</label><input type="text" id="t-address" placeholder="e.g. B10289, Al Quoz 3, Dubai" inputmode="text"></div>
+        <div><label>End Client Name</label><input type="text" id="t-client" placeholder="e.g. Arab and India Spices FZC" inputmode="text" required></div>
+        <div><label>Delivery Note #</label><input type="text" id="t-dn" placeholder="e.g. WB1-82546" inputmode="text"></div>
+        <div><label>Vehicle Plate No.</label><input type="text" id="t-plate" placeholder="e.g. 85017-J" inputmode="text" autocapitalize="characters" required></div>
       </div>
       <div class="form-row">
-        <div><label>Origin (Load)</label><input type="text" id="t-origin" placeholder="e.g. Fujairah" required></div>
-        <div><label>Destination (Unload)</label><input type="text" id="t-dest" placeholder="e.g. Ajman" required></div>
-        <div><label>Freight Cost (AED)</label><input type="number" id="t-freight" step="any" placeholder="e.g. 1650" required></div>
-        <div><label>Toll Name / Location</label><input type="text" id="t-tollname" placeholder="e.g. Al Dhaid (Sharjah)"></div>
+        <div><label>Origin (Load)</label><input type="text" id="t-origin" placeholder="e.g. Fujairah" inputmode="text" required></div>
+        <div><label>Destination (Unload)</label><input type="text" id="t-dest" placeholder="e.g. Ajman" inputmode="text" required></div>
+        <div><label>Freight Cost (AED)</label><input type="number" id="t-freight" step="any" placeholder="e.g. 1650" inputmode="decimal" required></div>
+        <div><label>Toll Name / Location</label><input type="text" id="t-tollname" placeholder="e.g. Al Dhaid (Sharjah)" inputmode="text"></div>
       </div>
       <div class="form-row">
-        <div><label>Toll Cost (AED)</label><input type="number" id="t-tollcost" step="any" placeholder="e.g. 420" value="0"></div>
-        <div><label>Toll Receipt #</label><input type="text" id="t-receipt" placeholder="e.g. 3403041062610873221"></div>
+        <div><label>Toll Cost (AED)</label><input type="number" id="t-tollcost" step="any" placeholder="e.g. 420" inputmode="decimal" value="0"></div>
+        <div><label>Toll Receipt #</label><input type="text" id="t-receipt" placeholder="e.g. 3403041062610873221" inputmode="numeric"></div>
       </div>
       <button type="submit" style="width:100%;">Log Trip</button>
     </form>
@@ -520,7 +520,6 @@
   let chartInstance = null;
   let currentUser = localStorage.getItem('vantage_active_user') || null;
 
-  // Pagination Variables
   let lastVisibleDoc = null;
   let pageHistory = [];
   let currentPage = 1;
@@ -797,12 +796,12 @@
               <div><label>Partner Address</label><input type="text" id="e-address-${t.id}" value="${t.address || ''}"></div>
               <div><label>End Client</label><input type="text" id="e-client-${t.id}" value="${t.client}"></div>
               <div><label>Delivery Note #</label><input type="text" id="e-dn-${t.id}" value="${t.dn || ''}"></div>
-              <div><label>Plate No.</label><input type="text" id="e-plate-${t.id}" value="${t.plate}"></div>
+              <div><label>Plate No.</label><input type="text" id="e-plate-${t.id}" value="${t.plate}" autocapitalize="characters"></div>
               <div><label>Origin</label><input type="text" id="e-origin-${t.id}" value="${t.origin}"></div>
               <div><label>Destination</label><input type="text" id="e-dest-${t.id}" value="${t.dest}"></div>
-              <div><label>Freight Cost (AED)</label><input type="number" step="any" id="e-freight-${t.id}" value="${t.freight}"></div>
+              <div><label>Freight Cost (AED)</label><input type="number" step="any" id="e-freight-${t.id}" value="${t.freight}" inputmode="decimal"></div>
               <div><label>Toll Name</label><input type="text" id="e-tollname-${t.id}" value="${t.tollname || ''}"></div>
-              <div><label>Toll Cost (AED)</label><input type="number" step="any" id="e-tollcost-${t.id}" value="${t.tollcost || 0}"></div>
+              <div><label>Toll Cost (AED)</label><input type="number" step="any" id="e-tollcost-${t.id}" value="${t.tollcost || 0}" inputmode="decimal"></div>
               <div><label>Toll Receipt #</label><input type="text" id="e-receipt-${t.id}" value="${t.receipt || ''}"></div>
               <div style="grid-column: 1 / -1; display:flex; justify-content:flex-end; gap:10px; margin-top:10px;">
                 <button class="outline" onclick="toggleEditAccordion('${t.id}')">Cancel</button>
