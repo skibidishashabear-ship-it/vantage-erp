@@ -418,9 +418,9 @@
       </div>
     </div>
     <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
-      <h3>Total Invoiced Revenue</h3>
+      <h3>This Month's Invoiced Revenue</h3>
       <div class="val" id="total-revenue">0.00 AED</div>
-      <h3 style="margin-top: 15px;">Logged Trips</h3>
+      <h3 style="margin-top: 15px;">This Month's Logged Trips</h3>
       <div class="val" id="total-trips">0</div>
     </div>
   </div>
@@ -475,7 +475,7 @@
             <th>Client & Route</th>
             <th>Plate</th>
             <th>Logged By</th>
-            <th>Total (AED)</th>
+            <th>Freight (AED)</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -765,7 +765,7 @@
     if (!tbody) return;
     tbody.innerHTML = '';
     localData.trips.forEach(t => {
-      const total = (t.freight + t.tollcost).toFixed(2);
+      const freightOnly = (t.freight || 0).toFixed(2);
       const formattedDelivDate = t.date ? t.date.split('-').reverse().join('/') : 'N/A';
       const formattedIssueDate = t.issueDate ? t.issueDate.split('-').reverse().join('/') : formattedDelivDate;
       
@@ -778,7 +778,7 @@
           <td>${t.client} <br><small style="color:var(--text-muted);">${t.origin} ➔ ${t.dest}</small></td>
           <td>${t.plate}</td>
           <td><small>${t.createdBy || 'System'}</small></td>
-          <td><strong>${total} AED</strong></td>
+          <td><strong>${freightOnly} AED</strong></td>
           <td>
             <button class="outline" onclick="showTripDetails('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Details</button>
             <button class="outline" onclick="toggleEditAccordion('${t.id}')" style="padding:4px 8px; min-height:30px; font-size:0.8rem;">Edit</button>
@@ -912,7 +912,7 @@
     if (!isMultiple) {
       const t = selectedTrips[0];
       const delivDateStr = t.date ? t.date.split('-').reverse().join('/') : 'N/A';
-      const totalCost = (t.freight + (t.tollcost || 0)).toFixed(2);
+      const tripTotalWithToll = (t.freight + (t.tollcost || 0)).toFixed(2);
 
       wrapper.innerHTML = `
         <img src="header.jpg" class="inv-header-bg" alt="">
@@ -972,8 +972,8 @@
           </table>
 
           <div class="inv-totals">
-            <div>Subtotal: <strong>${totalCost} AED</strong></div>
-            <div class="grand-total">Total Due: <strong>${totalCost} AED</strong></div>
+            <div>Subtotal: <strong>${tripTotalWithToll} AED</strong></div>
+            <div class="grand-total">Total Due: <strong>${tripTotalWithToll} AED</strong></div>
           </div>
 
           <div class="stamp-container">
@@ -1094,14 +1094,22 @@
     const totalTripsEl = document.getElementById('total-trips');
     if (!totalRevEl || !totalTripsEl) return;
 
-    const totalRev = localData.trips.reduce((acc, t) => acc + t.freight + t.tollcost, 0);
-    totalRevEl.innerText = totalRev.toFixed(2) + ' AED';
-    totalTripsEl.innerText = localData.trips.length;
+    // Get current year-month string (e.g. "2026-10")
+    const currentMonthPrefix = new Date().toISOString().substring(0, 7);
+
+    let currentMonthTrips = localData.trips.filter(t => t.date && t.date.startsWith(currentMonthPrefix));
+
+    // Dashboard shows freight only (excluding toll tax)
+    const currentMonthRev = currentMonthTrips.reduce((acc, t) => acc + (t.freight || 0), 0);
     
+    totalRevEl.innerText = currentMonthRev.toFixed(2) + ' AED';
+    totalTripsEl.innerText = currentMonthTrips.length;
+    
+    // Group all trips by month for the line chart analytics
     const monthlyData = {};
     localData.trips.forEach(t => {
       const month = t.date ? t.date.substring(0, 7) : 'Unknown';
-      monthlyData[month] = (monthlyData[month] + t.freight + t.tollcost) || (t.freight + t.tollcost);
+      monthlyData[month] = (monthlyData[month] || 0) + (t.freight || 0);
     });
 
     const chartEl = document.getElementById('revenueChart');
@@ -1114,7 +1122,7 @@
       data: {
         labels: Object.keys(monthlyData).length ? Object.keys(monthlyData) : ['No Data'],
         datasets: [{
-          label: 'Revenue (AED)',
+          label: 'Monthly Freight Revenue (AED)',
           data: Object.keys(monthlyData).length ? Object.values(monthlyData) : [0],
           borderColor: '#10B981', backgroundColor: '#ECFDF5', fill: true, tension: 0.3
         }]
